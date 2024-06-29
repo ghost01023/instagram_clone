@@ -1,0 +1,26 @@
+<div class="navbar">
+            <div class="brand">
+                <img class="brand-image" src="./assets/logo.svg"></img>
+            </div>
+            <div class="nav-menus">
+                <div class="menu home-menu">
+                    <p class="home-menu-text">Home</p>
+                </div>
+                <div class="menu explore-menu">
+                    <p class="explore-menu-text">Explore</p>
+                </div>
+                <div class="menu messages-menu">
+                    <p class="message-menu-text">Messages</p>
+                </div>
+                <div class="menu create-post-menu">
+                    <p class="create-post-menu-text">Create</p>
+                </div>
+            </div>
+            <div class="user-profile">
+                <p>Your Profile</p>
+            </div>
+        </div>
+        <div class="main-content">
+            
+        </div>
+        <div class="algorithm-content"></div>

@@ -1,0 +1,21 @@
+<div class="post">
+                <div class="post-user">
+                    <img class="post-user-profile" src="3.png" />
+                    <p>@realyounus</p>
+                </div>
+                <div class="post-image-div">
+                    <img class="post-image" src="3.png" />
+                    <div class="image-interaction">
+                        <div class="likes-div">
+                            <img src="heart_66744.png" />
+                        </div>
+                        <div class="share-div">
+                            <img src="paper-plane_126536.png" />
+                        </div>
+                    </div>
+                    <div class="image-stats">
+                        <p><strong>83784</strong> Likes</p>
+                    </div>
+                    <p>This is a caption for the image.</p>
+                </div>
+            </div>

@@ -1,0 +1,41 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+.feed-container {
+    display: grid;
+    grid-template-rows: 1fr 8.5fr 0.5fr;
+    height: 100vh;
+}
+
+.feed-header {
+    display: grid;
+    grid-template-columns: 2fr 6.5fr 1.5fr;
+}
+
+.feed-header>div {
+    display: inline;
+}
+
+.feed-post {
+    display: grid;
+    padding: 2rem 4rem;
+    grid-template-columns: 2fr 6fr 2fr;
+}
+
+.post-caption {
+    text-align: right;
+}
+
+.post-image-div {
+    text-align: center;
+}
+
+.post-image {
+    height: 80vh;
+}

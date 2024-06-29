@@ -1,0 +1,32 @@
+{
+  "name": "instagram_webapp",
+  "version": "1.1.0",
+  "description": "a webapp that functions like instagram",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghost01023/instagram_clone.git"
+  },
+  "keywords": [
+    "instagram",
+    "social_media",
+    "web_app"
+  ],
+  "author": "Wani Furkan",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/ghost01023/instagram_clone/issues"
+  },
+  "homepage": "https://github.com/ghost01023/instagram_clone#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie": "^0.6.0",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "mysql2": "^3.10.1",
+    "ws": "^8.17.1"
+  }
+}

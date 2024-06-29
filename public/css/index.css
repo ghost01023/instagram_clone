@@ -1,0 +1,229 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+    font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container, .signup-container {
+    font-size: 16px;
+}
+
+/*
+{\START}LOGIN AND SIGNUP FORM CSS STYLES (mostly final)
+*/
+.login-container,
+.signup-container {
+    display: flex;
+    flex-flow: nowrap column;
+}
+
+.logup-field {
+    position: relative;
+    font-size: 14px;
+
+    margin-bottom: 5px;
+    display: inline-block;
+    --field-padding: 12px;
+}
+
+.logup-field input {
+    border: none;
+    -webkit-appearance: none;
+    -ms-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #f2f2f2;
+    padding: var(--field-padding);
+    border-radius: 3px;
+    width: 250px;
+    outline: none;
+    font-size: 14px;
+}
+
+.logup-field .placeholder {
+    position: absolute;
+    left: var(--field-padding);
+    width: calc(100% - (var(--field-padding) * 2));
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    top: 22px;
+    line-height: 100%;
+    transform: translateY(-50%);
+    color: #aaa;
+    transition:
+        top 0.2s ease,
+        color 0.2s ease,
+        font-size 0.2s ease;
+}
+
+.logup-field input.dirty+.placeholder,
+.logup-field input:focus+.placeholder,
+.logup-field input:not(:placeholder-shown)+.placeholder {
+    top: -10px;
+    font-size: 10px;
+    color: #222;
+}
+
+.logup-field:hover {
+    cursor: text;
+}
+
+.logup-field input {
+    background: none;
+    border: 1px solid #ddd;
+    transition: border-color 0.2s ease;
+}
+
+.logup-field input+.placeholder {
+    left: 8px;
+    padding: 0 5px;
+}
+
+.logup-field input.dirty,
+.logup-field input:not(:placeholder-shown),
+.logup-field input:focus {
+    border-color: #222;
+
+}
+
+.logup-field input.dirty+.placeholder,
+.logup-field input:not(:placeholder-shown)+.placeholder,
+.logup-field input:focus+.placeholder {
+    top: 0;
+    font-size: 10px;
+    color: #222;
+    background: #fff;
+    width: auto
+}
+
+.submit-button {
+    width: 100%;
+    border: #4BB4F8;
+    background: #4BB4F8;
+    padding: 0.5rem 0;
+    border-radius: 0.3rem;
+    color: white;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+.submit-button-active {
+    background: #0095F6;
+    cursor: pointer;
+}
+
+.submit-button-active:hover {
+    background: #0064e0;
+    cursor: pointer;
+}
+
+.login-container,
+.signup-container {
+    border: 1px solid #dbdbdb;
+    border-radius: 1px;
+    padding: 2rem 3rem;
+}
+
+.switch-form {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-flow: wrap row;
+}
+
+.switch-form-link {
+    color: #0095f6;
+    font-weight: bold;
+}
+
+.switch-form-link:hover {
+    cursor: pointer;
+}
+
+.logo {
+    width: 20vw;
+}
+
+/*
+{\END}LOGIN AND SIGNUP FORM CSS STYLES (mostly final)
+*/
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+.app-container {
+    display: grid;
+    padding: 5rem 3rem;
+}
+
+.app-container-main-app {
+    height: 90vh;
+    grid-template-columns: 2fr 6fr 2fr;
+}
+
+.app-container-logup { 
+padding: 5rem 3rem;
+}
+
+.navbar {
+    margin-right:3rem;
+}
+
+.brand-image {
+    width: 100%;
+    border-radius: 0.5rem;
+    margin-top: 3rem;
+    border: 1px solid gray;
+}
+
+.post-user {
+    display: flex;
+    flex-flow: nowrap row;
+    gap: 1rem;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.post-user-profile {
+    width: 80px;
+    height: auto;
+    border-radius: 100%;
+}
+
+.post {
+    display: grid;
+    height: 90vh;
+    grid-template-rows: 1fr 9fr;
+    border: 1px solid black;
+    padding: 1rem;
+}
+
+.post-image {
+    width:100%;
+    margin: 1rem 0;
+}
+
+.image-interaction {
+    display: flex;
+    flex-flow: nowrap row;
+    width: 100%;
+    gap: 1rem;
+    margin-left: 1rem;
+}
+
+.image-interaction>div>img {
+    width: 40px;
+    height: 40px;
+}
+
+.image-stats {
+    margin-left: 1rem;
+}

@@ -1,0 +1,18 @@
+<form action="/login">
+<div class="login-container">
+<img class="logo" src="logo.svg">
+<label class="logup-field">
+<input name="username-email" type="text" placeholder=" " />
+<span class="placeholder">Enter username or email</span>
+</label>
+<label class="logup-field">
+<input name="password" type="password" placeholder=" " />
+<span class="placeholder">Password</span>
+</label>
+<button class="submit-button">Log in</button>
+</div>
+<div class="switch-form login-container">
+<span class="switch-form-prompt">Don't have an account? </span>
+<span class="switch-form-link">Sign up</span>
+</div>
+</form>
