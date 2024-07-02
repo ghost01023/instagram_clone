@@ -1,21 +1,119 @@
-<div class="post">
-                <div class="post-user">
-                    <img class="post-user-profile" src="3.png" />
-                    <p>@realyounus</p>
-                </div>
-                <div class="post-image-div">
-                    <img class="post-image" src="3.png" />
-                    <div class="image-interaction">
-                        <div class="likes-div">
-                            <img src="heart_66744.png" />
-                        </div>
-                        <div class="share-div">
-                            <img src="paper-plane_126536.png" />
-                        </div>
-                    </div>
-                    <div class="image-stats">
-                        <p><strong>83784</strong> Likes</p>
-                    </div>
-                    <p>This is a caption for the image.</p>
-                </div>
+    <div class="navbar">
+        <div class="brand">
+            <img class="brand-image" src="./assets/logo.png">
+        </div>
+        <div class="nav-menus">
+            <div class="menu-option home-menu">
+                <img src="./assets/home (1).svg" class="menu-image" />
+                <p class="navbar-option">Home</p>
             </div>
+            <div class="menu-option explore-menu">
+                <img src="./assets/Search_icon.svg" class="menu-image" />
+                <p class="navbar-option">Explore</p>
+            </div>
+            <div class="menu-option messages-menu">
+                <img src="./assets/chat_menu.png" class="menu-image" />
+                <p class="navbar-option"></span>Messages</p>
+            </div>
+            <div class="menu-option">
+                <img src="./assets/post.svg" class="menu-image" />
+                <p class="navbar-option">Create</p>
+            </div>
+        </div>
+        <div class="user-profile">
+            <p>Your Profile</p>
+        </div>
+    </div>
+    <div id="posts"> <!--
+        <div id="post">
+            <img id="image" src="./assets/hijab.jpg" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="./assets/logo.svg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <p>I am the Dog, the debut album by Sir Chloe out May 19<br>
+                        What is a dog to a shepherd; what is a dog to a sheep?<br><br>
+                        6 days before Pearl was born I was lucky enough to work with the absolute A squad on the shoot
+                        for
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Typography by Drew Heffron</p>
+                </div>
+                <div id="icons">
+                    <img src="./assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="./assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595 likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+        <div id="post">
+            <img id="image" src="./assets/3.png" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="./assets/hijab.jpg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <p>I am the Dog, the debut album by Sir Chloe out May 19<br>
+                        What is a dog to a shepherd; what is a dog to a sheep?<br><br>
+                        6 days before Pearl was born I was lucky enough to work with the absolute A squad on the shoot
+                        for
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Typography by Drew Heffron</p>
+                </div>
+                <div id="icons">
+                    <img src="./assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="./assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595 likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+        <div id="post">
+            <img id="image" src="./assets/1.png" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="./assets/hijab.jpg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <p>I am the Dog</p>
+                </div>
+                <div id="icons">
+                    <img src="./assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="./assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595s likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+        -->
+    </div>

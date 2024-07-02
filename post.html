@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post</title>
+    <style>
+        body {
+            font-family: "Instagram Sans", sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+        }
+
+        .scrollbar {
+            background: transparent;
+            overflow-y: scroll;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
+            background-color: transparent;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+            background-color: transparent;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background-color: #ffffff;
+        }
+
+        #posts {
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-flow: nowrap column;
+            align-items: center;
+        }
+
+
+
+        #post {
+            display: flex;
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            justify-content: center;
+            overflow: hidden;
+            max-width: 60vw;
+            min-height: 70vh;
+            margin-bottom: 1rem;
+        }
+
+        #image {
+            max-width: 65%;
+            max-height: 95vh;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        #content {
+            padding: 14px;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header,
+        #caption-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #header img,
+        #caption-header img {
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+        }
+
+        #header div,
+        #caption-header div {
+            font-weight: bold;
+        }
+
+        #text {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #text p {
+            margin: 0;
+            max-height: 80vh;
+            /* Set a max height to limit visible text */
+            overflow-y: scroll;
+            /* Enable vertical scrolling */
+            padding-right: 15px;
+            /* Add space for hidden scrollbar */
+        }
+
+        #text p::-webkit-scrollbar {
+            width: 0;
+            /* Remove scrollbar width */
+            background: transparent;
+            /* Optional: Add background if needed */
+        }
+
+        #icons {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        #icons img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        #likes {
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        #date {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .navbar {
+            min-width: 5rem;
+            max-width: 10rem;
+            padding: 2rem;
+            height: 100%;
+            position: fixed;
+            -webkit-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
+            -moz-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
+            box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
+            left: 0;
+            top: auto;
+            bottom: auto;
+            display: flex;
+            flex-flow: nowrap column;
+        }
+
+        .navbar-option {
+            margin: 20px 0;
+            padding: 0 5px;
+            text-decoration: none;
+            text-align: left;
+            font-size: 18px;
+            transition: 0.5s;
+        }
+
+        .menu-option {
+            display: flex;
+            flex-flow: nowrap row;
+            align-items: center;
+            justify-content: flex-start;
+            transition: ease-in-out 0.1s;
+            border: 1px solid white;
+        }
+
+        .menu-option:hover {
+            cursor: pointer;
+            border: 1px solid grey;
+            border-radius: 2px;
+        }
+
+        .menu-image {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            display: inline;
+        }
+
+        .brand-image {
+            width: 90%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="brand">
+            <img class="brand-image" src="./public/assets/logo_white.png">
+        </div>
+        <div class="nav-menus">
+            <div class="menu-option">
+                <img src="./public/assets/home (1).svg" class="menu-image" />
+                <p class="navbar-option">Home</p>
+            </div>
+            <div class="menu-option">
+                <img src="./public/assets/Search_icon.svg" class="menu-image" />
+                <p class="navbar-option">Explore</p>
+            </div>
+            <div class="menu-option">
+                <img src="./public/assets/chat_menu.png" class="menu-image" />
+                <p class="navbar-option"></span>Messages</p>
+            </div>
+            <div class="menu-option">
+                <img src="./public/assets/chat_menu.png" class="menu-image" />
+                <p class="navbar-option">Create</p>
+            </div>
+        </div>
+        <div class="user-profile">
+            <p>Your Profile</p>
+        </div>
+    </div>
+    <div id="posts">
+        <div id="post">
+            <img id="image" src="./public/assets/hijab.jpg" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="./public/assets/logo.svg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <div id="caption-header">
+                        <img src="./public/assets/Instagram.jpg" alt="Profile Picture">
+                        <div>mollyjane_x</div>
+                    </div>
+                    <p>I am the Dog, the debut album by Sir Chloe out May 19<br>
+                        What is a dog to a shepherd; what is a dog to a sheep?<br><br>
+                        6 days before Pearl was born I was lucky enough to work with the absolute A squad on the shoot
+                        for
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Typography by Drew Heffron</p>
+                </div>
+                <div id="icons">
+                    <img src="./public/assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="././public/assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595 likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+        <div id="post">
+            <img id="image" src="./public/assets/3.png" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="profile_picture.jpg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <div id="caption-header">
+                        <img src="profile_picture.jpg" alt="Profile Picture">
+                        <div>mollyjane_x</div>
+                    </div>
+                    <p>I am the Dog, the debut album by Sir Chloe out May 19<br>
+                        What is a dog to a shepherd; what is a dog to a sheep?<br><br>
+                        6 days before Pearl was born I was lucky enough to work with the absolute A squad on the shoot
+                        for
+                        Sir Chloe’s debut album packaging (and more 😉)<br><br>
+                        Grant Spanier is not only one of the most generous people I’ve ever worked with, he’s also one
+                        of
+                        the most talented 💕 he shot the shots but he also directed, corralled, pulled together a team,
+                        herded sheep...<br><br>
+                        Patience Harding and her team conceived of the sets and brought this beautiful world to
+                        life<br><br>
+                        Typography by Drew Heffron</p>
+                </div>
+                <div id="icons">
+                    <img src="./public/assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="././public/assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595 likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+        <div id="post">
+            <img id="image" src="./public/assets/1.png" alt="Post Image">
+            <div id="content">
+                <div id="header">
+                    <img src="profile_picture.jpg" alt="Profile Picture">
+                    <div>mollyjane_x</div>
+                </div>
+                <div id="text">
+                    <div id="caption-header">
+                        <img src="profile_picture.jpg" alt="Profile Picture">
+                        <div>mollyjane_x</div>
+                    </div>
+                    <p>I am the Dog</p>
+                </div>
+                <div id="icons">
+                    <img src="./public/assets/heart.png" class="like-icon" alt="Like Icon">
+                    <img src="././public/assets/share.png" class="share-icon" alt="Share Icon">
+                </div>
+                <div id="likes">1,595 likes</div>
+                <div id="date">February 23, 2023</div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const createInstagramPost = (imageSrc, paragraphText, likes, date) => {
+        // Create main post container
+        const post = document.createElement('div');
+        post.id = 'post';
+        // Create image element
+        const image = document.createElement('img');
+        image.id = 'image';
+        image.src = imageSrc;
+        image.alt = 'Post Image';
+        post.appendChild(image);
+
+        // Create content container
+        const content = document.createElement('div');
+        content.id = 'content';
+        post.appendChild(content);
+
+        // Create header
+        const header = document.createElement('div');
+        header.id = 'header';
+        content.appendChild(header);
+
+        const profileImg = document.createElement('img');
+        profileImg.src = './public/assets/logo.svg';
+        profileImg.alt = 'Profile Picture';
+        header.appendChild(profileImg);
+
+        const username = document.createElement('div');
+        username.textContent = 'mollyjane_x';
+        header.appendChild(username);
+
+        // Create text container
+        const text = document.createElement('div');
+        text.id = 'text';
+        content.appendChild(text);
+
+        const captionHeader = document.createElement('div');
+        captionHeader.id = 'caption-header';
+        text.appendChild(captionHeader);
+
+        const captionProfileImg = document.createElement('img');
+        captionProfileImg.src = './public/assets/hijab.jpg';
+        captionProfileImg.alt = 'Profile Picture';
+        captionHeader.appendChild(captionProfileImg);
+
+        const captionUsername = document.createElement('div');
+        captionUsername.textContent = 'mollyjane_x';
+        captionHeader.appendChild(captionUsername);
+
+        const paragraph = document.createElement('p');
+        paragraph.textContent = paragraphText;
+        text.appendChild(paragraph);
+
+        // Create icons container
+        const icons = document.createElement('div');
+        icons.id = 'icons';
+        content.appendChild(icons);
+
+        const likeIcon = document.createElement('img');
+        likeIcon.src = './public/assets/heart.png';
+        likeIcon.className = 'like-icon';
+        likeIcon.alt = 'Like Icon';
+        icons.appendChild(likeIcon);
+
+        const shareIcon = document.createElement('img');
+        shareIcon.src = './public/assets/share.png';
+        shareIcon.className = 'share-icon';
+        shareIcon.alt = 'Share Icon';
+        icons.appendChild(shareIcon);
+
+        // Create likes and date elements
+        const likesDiv = document.createElement('div');
+        likesDiv.id = 'likes';
+        likesDiv.textContent = `${likes} likes`;
+        content.appendChild(likesDiv);
+
+        const dateDiv = document.createElement('div');
+        dateDiv.id = 'date';
+        dateDiv.textContent = date;
+        content.appendChild(dateDiv);
+
+        // Return the constructed post element
+        document.querySelector("#posts").appendChild(post);
+    }
+
+</script>
+
+</html>

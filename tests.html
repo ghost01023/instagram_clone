@@ -101,32 +101,11 @@
         }
 
         .current-chat-content {
-            overflow-y: auto;
+            display: grid;
+            grid-template-rows: repeat(1fr 1fr);
+            row-gap: 2rem;
         }
 
-        .chat-list,
-        .current-chat-content {
-            scrollbar-width: auto;
-            scrollbar-color: #000000 #3e3838;
-        }
-
-
-        .chat-list::-webkit-scrollbar,
-        .current-chat-content::-webkit-scrollbar {
-            width: 16px;
-        }
-
-        .chat-list::-webkit-scrollbar-track,
-        .current-chat-content::-webkit-scroll-track {
-            background: #282525;
-        }
-
-        .chat-list::-webkit-scrollbar-thumb,
-        .current-chat-content::-webkit-scrollbar-thumb {
-            background-color: #000000;
-            border-radius: 0px;
-            border: 3px solid #ffffff;
-        }
 
         .current-chat-input {
             display: flex;
@@ -138,61 +117,267 @@
             width: 90%;
             font-size: 1rem;
         }
+
+        .scrollbar {
+            background: transparent;
+            overflow-y: scroll;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            background-color: transparent;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+            background-color: transparent;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background-color: #000000;
+        }
+
+        .current-chat-content>div {
+            margin: 40px;
+            display: inline-block;
+            position: relative;
+            width: 200px;
+            height: auto;
+            background-color: lightyellow;
+        }
+
+        .friend-chat:before {
+            content: ' ';
+            position: absolute;
+            width: 0;
+            height: 0;
+            left: -40px;
+            right: auto;
+            top: -8px;
+            bottom: auto;
+        }
+
+        .friend-chat:after {
+            content: ' ';
+            position: absolute;
+            width: 0;
+            height: 0;
+            left: -20px;
+            right: auto;
+            top: 0px;
+            bottom: auto;
+            border: 22px solid;
+            border-color: lightyellow transparent transparent transparent;
+        }
+
+        .self-chat:before {
+            content: ' ';
+            position: absolute;
+            width: 0;
+            height: 0;
+            left: auto;
+            right: -40px;
+            top: -8px;
+            bottom: auto;
+        }
+
+        .self-chat:after {
+            content: ' ';
+            position: absolute;
+            width: 0;
+            height: 0;
+            left: auto;
+            right: -20px;
+            top: 0px;
+            bottom: auto;
+            border: 20px solid;
+            border-color: lightyellow transparent transparent transparent;
+        }
+
+        .talktext {
+            padding: 1em;
+            text-align: left;
+            line-height: 1.2em;
+            -webkit-margin-before: 0em;
+            -webkit-margin-after: 0em;
+        }
     </style>
 </head>
 
 <body>
     <div class="app-container app-chat-container">
-        <div class="menu"></div>
+        <div class="menu">
+
+        </div>
         <div class="chat-container">
             <div class="chats">
-                ver
+                <input type="text" placeholder="search recent chats" />
+                <div class="chat-list scrollbar">
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="3.png" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>doherty</strong></p>
+                                <p class="chat-block-message-content">didn't see you at college today</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">9:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="hijab.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>charles</strong></p>
+                                <p class="chat-block-message-content">is this being sent?</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">8:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="Instagram.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>laughton</strong></p>
+                                <p class="chat-block-message-content">i'm coming over</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">6:03a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="3.png" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>doherty</strong></p>
+                                <p class="chat-block-message-content">didn't see you at college today</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">9:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="hijab.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>charles</strong></p>
+                                <p class="chat-block-message-content">is this being sent</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">8:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="Instagram.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>laughton</strong></p>
+                                <p class="chat-block-message-content">i'm coming over</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">6:03a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="3.png" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>doherty</strong></p>
+                                <p class="chat-block-message-content">didn't see you at college today</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">9:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="hijab.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>charles</strong></p>
+                                <p class="chat-block-message-content">is this being sent</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">8:37a.m.</p>
+                        </div>
+                    </div>
+                    <div class="chat-block">
+                        <div class="chat-block-profile">
+                            <img class="chat-block-pic" src="Instagram.jpg" />
+                        </div>
+                        <div class="chat-block-name-text">
+                            <div class="chat-block-name">
+                                <p class="chat-block-name-para"><strong>laughton</strong></p>
+                                <p class="chat-block-message-content">i'm coming over</p>
+                            </div>
+                        </div>
+                        <div class="chat-block-time">
+                            <p class="chat-block-time-para">6:03a.m.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="current-chat">
                 <div class="current-chat-header">
                     <img class="current-chat-profile" src="./3.png">
                     <div class="current-chat-user-details">
-                        <p class="current-chat-user">werner</p>
+                        <p class="current-chat-user">doherty</p>
                         <p class="current-chat-last-seen">11:45pm</p>
                     </div>
                 </div>
-                <div class="current-chat-content">
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
-                    <p>Hello</p>
+                <div class="current-chat-content scrollbar">
+                    <div class="friend-chat">
+                        <p class="talktext">Hello</p>
+                    </div>
+                    <div class="self-chat">
+                        <p class="talktext">Hi!</p>
+                    </div>
+                    <div class="friend-chat">
+                        <p class="talktext">Haven't seen you in college for the past few days</p>
+                    </div>
+                    <div class="self-chat">
+                        <p class="talktext">yep</p>
+                    </div>
+                    <div class="friend-chat">
+                        <p class="talktext">where have you been?</p>
+                    </div>
+                    <div class="self-chat">
+                        <p class="talktext">busy</p>
+                    </div>
+                    <div class="friend-chat">
+                        <p>didn't see you at college today</p>
+                    </div>
                 </div>
                 <div class="current-chat-input">
                     <input type="text" placeholder="enter your message">
                 </div>
             </div>
         </div>
+    </div>
 </body>
 
 </html>

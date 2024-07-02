@@ -1,6 +1,7 @@
+<div class=login-page>
 <form action="/login">
 <div class="login-container">
-<img class="logo" src="logo.svg">
+<img class="logo" src="./assets/logo.svg">
 <label class="logup-field">
 <input name="username-email" type="text" placeholder=" " />
 <span class="placeholder">Enter username or email</span>
@@ -16,3 +17,4 @@
 <span class="switch-form-link">Sign up</span>
 </div>
 </form>
+</div>
