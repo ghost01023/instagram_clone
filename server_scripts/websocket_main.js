@@ -12,12 +12,11 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
     const wss = new ws.Server({ port: 5050 });
     console.log("WebSocket is running on PORT 5050");
     wss.on("connection", async (ws, request) => {
-        console.log("Clients are now...");
-        for (let [key] in clients) {
-            console.log(key);
-        }
         let seltzer = cookie.parse(request.headers.cookie || "")["seltzer"];
         let username = cookie.parse(request.headers.cookie || "")["username"];
+        // for (let [key] in clients) {
+        //     console.log(key);
+        // }
         if (!seltzer || !username) {
             console.log("User is not identifiable...");
             ws.send(JSON.stringify(
@@ -26,32 +25,26 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                     verificationStatus: false
                 }
             ));
-            return;
         }
-        let isAuthenticated = await authenticateUser(seltzer, username, connection);
-        console.log("AUTHENTICATION STATUS IS %s", isAuthenticated);
-        if (!isAuthenticated) {
-            ws.send(JSON.stringify(
-                {
-                    messageType: "verificationStatus",
-                    verificationStatus: false
-                }
-            ));
-            return;
-        } else {
-            if (!clients.get(username)) {
-                clients.set(username);
-            }
-            sendOnlineStatus(username, clients, connection);
-        }
+        console.log("SOCKET CONNECTION MADE");
+        //NOW SWITCH TO FINDING USERNAME AND SELTZER THROUGH DOCUMENT COOKIES
         ws.on("message", async (d) => {
-            isAuthenticated = await authenticateUser(seltzer, username, connection);
-            console.log("Received a message [%s] from websocket", JSON.parse[d]);
             const data = JSON.parse(d);
             seltzer = cookie.parse(data["cookieContent"] || "")["seltzer"];
             username = cookie.parse(data["cookieContent"] || "")["username"];
+            console.log("RECEIVED MESSAGE FROM SOCKET WITH USERNAME %s. WILL CHECK FOR AUTHENTICATION NOW.", username);
+            const isAuthenticated = await authenticateUser(seltzer, username, connection);
+            if (!isAuthenticated) {
+                ws.send(JSON.stringify(
+                    {
+                        messageType: "verificationStatus",
+                        verificationStatus: false
+                    }
+                ))
+                return;
+            }
             switch (true) {
-                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "allRecentChats"].includes(data["messageType"]): {
+                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "latestAllChats"].includes(data["messageType"]): {
                     switch (data["messageType"]) {
                         case "verificationStatus": {
                             console.log("%s ASKED FOR VERIFICATION STATUS", username);
@@ -61,9 +54,19 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                                     "verificationStatus": true
                                 })
                             );
-                        }
-                        case "allRecentChats": {
+                        } break;
+                        case "latestAllChats": {
                             console.log("Fetching all recent chats for %s", username);
+                            const results = await fetchLatestAllChats(username, connection);
+                            console.log(results);
+                            ws.send(
+                                JSON.stringify(
+                                    {
+                                        "messageType": "latestAllChats",
+                                        "allChatsContent": results
+                                    }
+                                )
+                            )
                         } break;
                         case "fetchFeedPosts": {
                             console.log("Time to see about those posts in the feed...");
@@ -72,7 +75,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         } break;
                         case "uploadPost": {
                             console.log("%s wants to upload a post", username);
-                            const { postImage, caption } = data;
+                            let { postImage, caption } = data;
                             if (caption.trim().length === 0) {
                                 caption = "NULL";
                             }
@@ -315,9 +318,41 @@ const sendOnlineStatus = async (username, clients, connection, online) => {
     })
 }
 
+const fetchLatestAllChats = (username, connection) => {
+    const latestAllChatsQuery = `WITH latest_messages AS (SELECT chat_id, message_from, message_to, message_content, message_date, ROW_NUMBER() OVER (PARTITION BY LEAST(message_from, message_to), GREATEST(message_from, message_to) ORDER BY message_date DESC) AS rn FROM chats WHERE message_from = (SELECT id FROM users WHERE username="${username}") OR message_to = (SELECT id FROM users WHERE username="${username}")) SELECT CASE WHEN message_from =(SELECT id FROM users WHERE username="${username}") THEN (SELECT username FROM users WHERE id=message_to) ELSE (SELECT username FROM users WHERE id=message_from) END AS friend_name, message_content, message_date FROM latest_messages WHERE rn = 1 ORDER BY message_date DESC;`;
+
+    console.log(latestAllChatsQuery);
+    return new Promise((resolve) => {
+        connection.query(latestAllChatsQuery, (error, results) => {
+            if (error) {
+                console.log(error);
+                resolve(false);
+            } else {
+                console.log("All recent chats were loaded successfully!");
+                resolve(results);
+            }
+        })
+    });
+}
+
 const setAsClient = (clientSocket, username, clients) => {
 
 }
 
+const signOutUser = (req, connection) => {
+    const username = cookie.parse(req.headers.cookie || "")["username"];
+    return new Promise((resolve) => {
+        connection.query(`DELETE FROM cookies WHERE user_id=(SELECT id FROM users WHERE username="${username}");`, (error) => {
+            if (error) {
+                console.log("Error while signing out the user");
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        })
+    })
+}
 
-module.exports = { handleWebSocketConnections, sendOnlineStatus }
+
+module.exports = { handleWebSocketConnections, sendOnlineStatus, signOutUser }
+

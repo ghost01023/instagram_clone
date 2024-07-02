@@ -1,25 +1,26 @@
 let appState = {
     currentMenu: "feed",
     oldestPostID: 0,
-    currentChat: "skylaryo",
+    currentChat: null,
     oldestMessageID: 0,
     lastPostReached: false
 }
 
 //http (&&) websocket URL connections
 const serverURL = "http://localhost:5000";
-const webSocketURL = "ws://localhost:5050";
+const webSocketURL = "http://localhost:5050";
+
 // const serverURL = "http://192.168.145.235:5000";
 // const webSocketURL = "ws://192.168.145.235:5050";
 
 
 const containerDiv = document.querySelector(".app-container");
-const body = document.querySelector("body");
+const bodyDiv = document.querySelector("body");
 let logInForm;
 
 /////////////////////////////////////////////
 ////////////////////////////////////////////
-const createInstagramPost = (postID, postCaption, postLikes, postDate, postUser, profilePicture) => {
+const createInstagramPost = (postID, postCaption, postLikes, postDate, postUser) => {
     const post = document.createElement('div');
     post.id = 'post';
     const image = document.createElement('img');
@@ -43,8 +44,15 @@ const createInstagramPost = (postID, postCaption, postLikes, postDate, postUser,
     content.appendChild(header);
 
     const profileImg = document.createElement('img');
-    profileImg.src = profilePicture
-    profileImg.alt = 'Profile Picture';
+    fetch(serverURL + "/profilePicture/" + postUser).then(res => res.json()).then(data => {
+        if (!data["image_present"]) {
+            profileImg.src = "./assets/default_profile.svg";
+            return;
+        }
+        const base64ProfilePicture = data["base64ProfilePicture"];
+        profileImg.src = base64ProfilePicture;
+    })
+    profileImg.alt = postUser + ' Profile Picture';
     header.appendChild(profileImg);
 
     const username = document.createElement('div');
@@ -127,6 +135,72 @@ const constructChatBox = (messageContent, messageTime, source, old) => {
 
 const ws = new WebSocket(webSocketURL);
 const xhr = new XMLHttpRequest();
+// LOGIN FORM EVENT LISTENER
+
+
+//SET UP SWITCH CASE FOR WEB SOCKET PACKET RECEPTION NATURE
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    switch (data["messageType"]) {
+        case "verificationStatus": {
+            if (data["verificationStatus"] !== true) {
+                console.log("Not verified, hence requesting logInPageInnerHTML");
+                xhr.open("GET", serverURL + "/logInPageInnerHTML", true);
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        console.log("ARRIVED: LOGIN.HTML")
+                        bodyDiv.innerHTML = xhr.responseText;
+                        const logInForm = document.querySelector(".login-form");
+                        logInForm.addEventListener("submit", logInFormSubmit);
+                    }
+                }
+                xhr.send();
+            } else {
+                console.log("Verified server side, hence requesting /mainPage")
+                xhr.open("GET", serverURL + "/mainPageInnerHTML", true);
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        console.log("ARRIVED: MAIN_PAGE.HTML");
+                        bodyDiv.innerHTML = xhr.responseText;
+                        const homeMenu = document.querySelector(".home-menu");
+                        addMenuEventListeners();
+                        homeMenu.dispatchEvent(new Event("click"));
+                        appState.currentMenu = "mainPage";
+                    }
+                }
+                xhr.send();
+            }
+        }
+            break;
+        case "userFeedContent": {
+            console.log("Feed content received!");
+            console.log(data["userFeedContent"]);
+            data["userFeedContent"].map(post => {
+                console.log(post);
+                const {post_id, post_caption, total_likes, post_username, post_date} = post;
+                createInstagramPost(post_id, post_caption, total_likes, post_date, post_username);
+            })
+            console.log("Loaded all posts");
+        }
+            break;
+        case "followedUser": {
+            console.log("Followed %s", data["target"]);
+        }
+            break;
+        case "unFollowedUser": {
+            console.log("Unfollowed user is %s", data["target"]);
+        }
+            break;
+        case "latestAllChats": {
+            console.log(data["allChatsContent"]);
+            data["allChatsContent"].map(lastMessage => {
+                const {friend_name, message_content, message_date} = lastMessage;
+                console.log(friend_name, message_content, message_date);
+                createContactDiv(friend_name, message_content, message_date);
+            })
+        }
+    }
+}
 //A CONDITIONAL BASED ON WINDOW.LOCATION.HREF THAT MAKES APPROPRIATE REQUESTS{}
 
 ws.onopen = () => {
@@ -141,63 +215,7 @@ ws.onopen = () => {
             cookieContent: document.cookie
         }
     ));
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        switch (data["messageType"]) {
-            case "verificationStatus": {
-                console.log(data);
-                if (data["verificationStatus"] !== true) {
-                    console.log("Not verified, hence requesting logInPageInnerHTML");
-                    xhr.open("GET", serverURL + "/logInPageInnerHTML", true);
-                    xhr.onreadystatechange = () => {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            console.log("ARRIVED: LOGIN.HTML")
-                            // console.log(xhr.responseText);
-                            body.innerHTML = xhr.responseText;
-                            logInForm = document.querySelector(".login-form");
-                            //WAIT UNTIL LOGINFORM HAS BEEN ADDED TO DOM
-                            logInForm.addEventListener("submit", (event) => {
-                                logInFormSubmit(event);
-                            })
-                        }
-                    }
-                    xhr.send();
-                } else {
-                    console.log("Verified server side, hence requesting /mainPage")
-                    xhr.open("GET", serverURL + "/mainPageInnerHTML", true);
-                    xhr.onreadystatechange = () => {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            console.log("ARRIVED: MAIN_PAGE.HTML");
-                            body.innerHTML = xhr.responseText;
-                            const homeMenu = document.querySelector(".home-menu");
-                            addMenuEventListeners();
-                            homeMenu.dispatchEvent(new Event("click"));
-                            appState.currentMenu = "mainPage";
-                        }
-                    }
-                    xhr.send();
-                }
-            } break;
-            case "userFeedContent": {
-                console.log("Feed content received!");
-                console.log(data["userFeedContent"]);
-                data["userFeedContent"].map(post => {
-                    console.log(post);
-                    const { post_id, post_caption, total_likes, post_username, post_date } = post;
-                    createInstagramPost(post_id, post_caption, total_likes, post_date, post_username, "./assets/hijab.jpg");
-                })
-                console.log("Loaded all posts");
-            } break;
-            case "followedUser": {
-                console.log("Followed %s", data["target"]);
-            } break;
-            case "unFollowedUser": {
-                console.log("Unfolowed user is %s", data["target"]);
-            }
-        }
-    }
 }
-
 
 
 const logInFormSubmit = (event) => {
@@ -219,10 +237,11 @@ const logInFormSubmit = (event) => {
             console.log("Rendering main page in 3 seconds...");
             ws.send(JSON.stringify(
                 {
-                    messageType: "verificationStatus",
-                    cookieContent: document.cookie
+                    "messageType": "verificationStatus",
+                    "cookieContent": document.cookie
                 }
-            ));
+            ))
+            console.log("Send verificationStatus confirmation");
         }
     })
 }
@@ -348,7 +367,7 @@ const logInFormSubmit = (event) => {
 //                 //loadChats
 //                 //first, each last chat
 //                 //then, addEventlistener to all blocks
-//                 fetchAllRecentChats();
+//                 fetchLatestAllChats();
 //             } break;
 //             case "userFeed": {
 //                 console.log("User Feed Received");
@@ -476,11 +495,11 @@ const fetchLoginPageHTML = () => {
     xhr.send();
 }
 
-const fetchAllRecentChats = () => {
+const fetchLatestAllChats = () => {
     ws.send(
         JSON.stringify(
             {
-                "messageType": "allRecentChats",
+                "messageType": "latestAllChats",
                 "cookieContent": document.cookie
             }
         )
@@ -500,37 +519,109 @@ const fetchCurrentChat = () => {
     ))
 }
 
+const uploadImageEvent = (fileInput) => {
+    if (fileInput.files.length > 0) {
+        const image_file = fileInput["files"][0];
+        if (image_file && (image_file.type === "image/jpeg" || image_file.type === "image/png")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let formData = new FormData();
+                const imgData = {
+                    base64Image: e.target.result,
+                    imageCaption: document.querySelector(".upload-caption").value
+                };
+                formData.append("body", imgData);
+                let uploadRequest = new XMLHttpRequest();
+                console.log("Appended imageBlob of length %d to formData", formData.get("body").length);
+                uploadRequest.open("POST", serverURL + "/uploadPost");
+                uploadRequest.setRequestHeader("Content-Type", "application/json");
+                uploadRequest.onload = () => {
+                    if (uploadRequest["status"] === 200) {
+                        console.log("Image uploaded successfully!");
+                        document.querySelector(".create-menu").dispatchEvent(new Event("click"));
+                    }
+                }
+                uploadRequest.send(JSON.stringify({
+                    base64Image: e.target.result,
+                    imageCaption: document.querySelector(".upload-caption").value,
+                    cookies: document.cookie
+                }));
+            }
+            reader.readAsDataURL(image_file);
+        }
+    } else {
+        console.log("No image to upload");
+    }
+}
 
-const addMenuEventListeners = () => {
+const createFileInput = () => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    fileInput.class = "input-image-upload";
+    return fileInput;
+}
+const fileUploadListener = () => {
+    const selectImageButton = document.querySelector('.select-image');
+    const img = document.querySelector('.upload-image');
+    if (selectImageButton.classList.contains('remove')) {
+        console.log("Removing image from page");
+        img.src = './assets/logo.svg';
+        selectImageButton.textContent = 'Choose Image';
+        selectImageButton.classList.remove('remove');
+        //REMOVE IMAGE AND INSTEAD OF RESETTING ARRAY OF FILES IN FILE-INPUT, WE WILL DELETE THE FILE-INPUT ELEMENT AND CREATE A REPLICA OF IT WITHOUT THE LOADED FILE BUFFER
+        return;
+    }
+    let fileInput = createFileInput();
+    fileInput.addEventListener('change', (event) => {
+        console.log("image uploaded")
+        const file = event.target["files"][0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+                selectImageButton.textContent = 'Remove Image';
+                selectImageButton.classList.add('remove');
+            };
+            reader.readAsDataURL(file);
+        }
+    })
+    fileInput.click();
+    return fileInput;
+}
+const addFeedMenuEventListener = () => {
     const feedMenu = document.querySelector(".home-menu");
-    const bodyDiv = document.querySelector("body");
     feedMenu.addEventListener("click", () => {
         console.log("clicked on feedMenu");
+        //IF ANY OTHER MENU DIVS ARE PRESENT, REMOVE THEM
         const feedPostsDiv = document.querySelector("#posts");
         if (feedPostsDiv) {
             bodyDiv.removeChild(feedPostsDiv);
         }
-        if (["mainPage", "explore", "messages", "create"].includes(appState.currentMenu)) {
-            const messagesContentDiv = document.querySelector(".container");
-            if (messagesContentDiv) {
-                bodyDiv.removeChild(messagesContentDiv);
-            }
-            const uploadAreaDiv = document.querySelector(".upload-area");
-            if (uploadAreaDiv) {
-                bodyDiv.removeChild(uploadAreaDiv);
-            }
-            appState.oldestPostID = 0;
-            appState.currentMenu = "mainPage";
-            ws.send(
-                JSON.stringify(
-                    {
-                        "messageType": "fetchFeedPosts",
-                        "oldestPostID": appState.oldestPostID,
-                        "cookieContent": document.cookie
-                    }
-                ));
+        const messagesContentDiv = document.querySelector(".container");
+        if (messagesContentDiv) {
+            bodyDiv.removeChild(messagesContentDiv);
         }
+        const uploadAreaDiv = document.querySelector(".upload-area");
+        if (uploadAreaDiv) {
+            bodyDiv.removeChild(uploadAreaDiv);
+        }
+        // REFRESH APP-STATE WITH OLDEST POST ID AND PAGE NAME
+        appState.oldestPostID = 0;
+        appState.currentMenu = "mainPage";
+        // REQUEST LATEST 25 FEED POSTS
+        ws.send(
+            JSON.stringify(
+                {
+                    "messageType": "fetchFeedPosts",
+                    "oldestPostID": appState.oldestPostID,
+                    "cookieContent": document.cookie
+                }
+            ));
     })
+}
+const addChatMenuEventListener = () => {
     const chatMenu = document.querySelector(".messages-menu");
     chatMenu.addEventListener("click", () => {
         // IF CHAT MENU IS NOT CURRENT PAGE (AND) IS home || explore || create instead of the loginPage || signupPage
@@ -553,28 +644,45 @@ const addMenuEventListeners = () => {
                 }
                 console.log(xhr.responseText);
                 bodyDiv.insertAdjacentHTML("beforeend", xhr.responseText);
+                fetchLatestAllChats();
                 appState.currentMenu = "messages";
             }
         }
         xhr.send();
     })
+}
+
+const addExploreMenuEventListener = () => {
     const exploreMenu = document.querySelector(".explore-menu");
     exploreMenu.addEventListener("click", () => {
         if (["mainPage", "home", "messages", "create"].includes(appState.currentMenu)) {
             console.log("Explore Menu. Coming Soon");
         }
     });
+}
+
+const addUploadImageEventListener = () => {
+    const selectImageButton = document.querySelector('.select-image');
+    selectImageButton.addEventListener('click', () => {
+        const newFileInput = fileUploadListener();
+        const uploadButton = document.querySelector(".post-button");
+        uploadButton.addEventListener("click", () => uploadImageEvent(newFileInput));
+    });
+
+}
+const addCreateMenuEventListener = () => {
     const createMenu = document.querySelector(".create-menu");
     createMenu.addEventListener("click", () => {
         const containerDiv = document.querySelector(".container");
         const feedDiv = document.querySelector("#posts");
         const uploadArea = document.querySelector(".upload-area");
+        //REMOVE BLUR FILTERS ON ALL ELEMENT WINDOWS IF UPLOAD AREA IS PRESENTS
         if (uploadArea) {
             document.querySelector("body").removeChild(uploadArea);
-            //REMOVE BLUR FILTERS ON ALL ELEMENT WINDOWS
             if (containerDiv) {
                 containerDiv.style.filter = "none";
-            } if (feedDiv) {
+            }
+            if (feedDiv) {
                 feedDiv.style.filter = "none";
             }
             return;
@@ -583,156 +691,84 @@ const addMenuEventListeners = () => {
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 document.querySelector("body").insertAdjacentHTML("beforeend", xhr.responseText);
-                //SET OTHER ITEMS TO GREY COLOR
-
+                //SET OTHER ITEMS TO GREY COLOR IF THEY EXIST
                 if (containerDiv) {
-                    console.log("Applying blur to container div");
                     containerDiv.style.filter = "blur(2px)";
                 }
-
                 if (feedDiv) {
                     feedDiv.style.filter = "blur(2px)";
                 }
                 appState.currentMenu = "create";
-                const selectImageButton = document.querySelector('.select-image');
-                const img = document.querySelector('.upload-image');
-                let fileInput = document.querySelector(".input-image-upload");
-                const fileUploadListener = () => {
-                    if (selectImageButton.classList.contains('remove')) {
-                        img.src = './assets/logo.svg';
-                        selectImageButton.textContent = 'Choose Image';
-                        selectImageButton.classList.remove('remove');
-                        document.querySelector(".upload-area").removeChild(fileInput);
-                        fileInput = document.createElement('input');
-                        fileInput.type = 'file';
-                        fileInput.accept = 'image/*';
-                        fileInput.style.display = 'none';
-                        fileInput.class = "input-image-upload";
-                        document.querySelector(".upload-area").appendChild(fileInput);
-                        fileInput.addEventListener('change', (event) => {
-                            console.log("image uploaded")
-                            const file = event.target.files[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    img.src = e.target.result;
-                                    selectImageButton.textContent = 'Remove Image';
-                                    selectImageButton.classList.add('remove');
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        })
-                    } else {
-                        if (!fileInput) {
-                            fileInput = document.createElement('input');
-                            fileInput.type = 'file';
-                            fileInput.accept = 'image/*';
-                            fileInput.style.display = 'none';
-                            fileInput.class = "input-image-upload";
-                            document.querySelector(".upload-area").appendChild(fileInput);
-                            fileInput.addEventListener('change', (event) => {
-                                console.log("image uploaded")
-                                const file = event.target.files[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        img.src = e.target.result;
-                                        selectImageButton.textContent = 'Remove Image';
-                                        selectImageButton.classList.add('remove');
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            })
-                        }
-                        // Trigger the file input click
-                        fileInput.click();
-                    }
-                }
-                selectImageButton.addEventListener('click', fileUploadListener);
-                const uploadButton = document.querySelector(".post-button");
-                uploadButton.addEventListener("click", () => {
-                    if (fileInput) {
-                        if (fileInput.files.length > 0) {
-                            console.log("OK");
-                            const image_file = fileInput["files"][0];
-                            if (image_file && (image_file.type === "image/jpeg" || image_file.type === "image/png")) {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    let formData = new FormData();
-                                    // console.log(e.target.result);
-                                    const imgData = {
-                                        base64Image: e.target.result,
-                                        imageCaption: document.querySelector(".upload-caption").value
-                                    };
-                                    formData.append("body", imgData);
-                                    let uploadRequest = new XMLHttpRequest();
-                                    console.log("Appended imageBlob of length %d to formData", formData.get("body").length);
-                                    uploadRequest.open("POST", serverURL + "/uploadPost");
-                                    uploadRequest.setRequestHeader("Content-Type", "application/json");
-                                    uploadRequest.onload = () => {
-                                        if (uploadRequest["status"] === 200) {
-                                            console.log("Image uploaded successfully!");
-                                        }
-                                    }
-                                    uploadRequest.send(JSON.stringify({
-                                        base64Image: e.target.result,
-                                        imageCaption: document.querySelector(".upload-caption").value,
-                                        cookies: document.cookie
-                                    }));
-                                    console.log("Sent formData()");
-                                }
-                                reader.readAsDataURL(image_file);
-                            }
-                        } else {
-                            console.log("No image to upload");
-                        }
-                    }
-                })
+                addUploadImageEventListener();
             }
         }
         xhr.send();
     })
 }
 
+const addMenuEventListeners = () => {
+    addFeedMenuEventListener();
+    addChatMenuEventListener();
+    addExploreMenuEventListener();
+    addCreateMenuEventListener();
+    const bodyDiv = document.querySelector("body");
+    document.querySelector(".sign-out").addEventListener("click", () => {
+        console.log("Trying to sign out...");
+        xhr.open("GET", serverURL + "/signOut", true);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                ws.send(JSON.stringify(
+                    {
+                        messageType: "verificationStatus",
+                        cookieContent: document.cookie
+                    }
+                ));
+            }
+        }
+        xhr.send();
+
+    })
+}
+
 
 ////RENDERING HTML PORTIONS OF THE WEBAPP
 const renderCurrentChatHTML = (profilePicture, username, messages) => {
-    var mainDiv = document.createElement('div');
+    let mainDiv = document.createElement('div');
     mainDiv.className = 'main';
 
-    var headerDiv = document.createElement('div');
+    let headerDiv = document.createElement('div');
     headerDiv.className = 'header';
 
-    var img = document.createElement('img');
+    let img = document.createElement('img');
     img.src = profilePicture;
     img.alt = username;
 
-    var nameDiv = document.createElement('div');
+    let nameDiv = document.createElement('div');
     nameDiv.textContent = username;
 
     headerDiv.appendChild(img);
     headerDiv.appendChild(nameDiv);
 
-    var messagesDiv = document.createElement('div');
+    let messagesDiv = document.createElement('div');
     messagesDiv.className = 'messages scrollbar';
 
-    var label = document.createElement('label');
+    let label = document.createElement('label');
     label.className = 'logup-field chat-text-label';
 
-    var input = document.createElement('input');
+    let input = document.createElement('input');
     input.id = 'chat-text-input';
     input.name = 'current-chat-text';
     input.type = 'text';
     input.placeholder = ' ';
 
-    var span = document.createElement('span');
+    let span = document.createElement('span');
     span.className = 'placeholder';
     span.textContent = 'Type a message';
 
     label.appendChild(input);
     label.appendChild(span);
 
-    var button = document.createElement('button');
+    let button = document.createElement('button');
     button.type = 'button';
     button.className = 'send-message submit-button';
     button.textContent = 'Send';
@@ -810,4 +846,78 @@ const getSignUpPage = () => {
         }
     }
     xhr.send();
+}
+
+const createContactDiv = (username, messageContent, messageDate) => {
+    const contacts = document.querySelector(".contacts");
+    const contactDiv = document.createElement('div');
+    contactDiv.className = 'contact';
+
+// Create the img element
+    const profileImg = document.createElement('img');
+    // img.src = './assets/hijab.jpg';
+    fetch(serverURL + "/profilePicture/" + username).then(res => res.json()).then(data => {
+        if (!data["image_present"]) {
+            profileImg.src = "./assets/default_profile.svg";
+            return;
+        }
+        const base64ProfilePicture = data["base64ProfilePicture"];
+        profileImg.src = base64ProfilePicture;
+    })
+    profileImg.alt = username + " profile picture";
+
+// Create the contact-box div
+    const contactBox = document.createElement('div');
+    contactBox.className = 'contact-box';
+
+// Create the contact-name div
+    const contactName = document.createElement('div');
+    contactName.className = 'contact-name';
+    contactName.textContent = username;
+
+// Create the contact-last-chat div
+    const contactLastChat = document.createElement('div');
+    contactLastChat.className = 'contact-last-chat';
+    if (messageContent.length > 100) {
+        messageContent = messageContent.substring(0, 100) + "...";
+    }
+    contactLastChat.textContent = messageContent.substring(0, 103);
+
+// Create the chat-time div
+    const chatTime = document.createElement('div');
+    chatTime.className = 'chat-time';
+    chatTime.textContent = formatDateTime(messageDate);
+
+// Append elements to their respective parents
+    contactBox.appendChild(contactName);
+    contactBox.appendChild(contactLastChat);
+    contactBox.appendChild(chatTime);
+    contactDiv.appendChild(profileImg);
+    contactDiv.appendChild(contactBox);
+    contacts.appendChild(contactDiv);
+}
+
+const formatDateTime = (datetimeString) => {
+    const inputDate = new Date(datetimeString);
+    const currentDate = new Date();
+
+    const diffInMilliseconds = currentDate - inputDate;
+    const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
+    const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
+
+    if (diffInHours > 12 && currentDate.getDate() === inputDate.getDate() + 1) {
+        return "Yesterday";
+    } else if (diffInHours < 24) {
+        const hours = inputDate.getHours();
+        const minutes = inputDate.getMinutes();
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = minutes.toString().padStart(2, '0');
+        return `${formattedHours}:${formattedMinutes}${ampm}`;
+    } else {
+        const day = inputDate.getDate().toString().padStart(2, '0');
+        const month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+        const year = inputDate.getFullYear().toString().slice(-2);
+        return `${day}/${month}/${year}`;
+    }
 }

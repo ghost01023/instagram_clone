@@ -202,7 +202,6 @@ body {
     width: 100vw;
     overflow-x: hidden;
     position: absolute;
-    
     left: 20%;
 }
 
@@ -210,18 +209,28 @@ body {
     overflow-x: hidden;
     display: flex;
     flex-flow: nowrap row;
-    height: 100vh;
+    height: 100%;
 }
 
 .sidebar {
-    width: 250px;
-    padding-top: 20px;
-    height: 95%;
+    height: 100%;
     display: flex;
+    justify-content: space-between;
+    /*margin-bottom: 20px;*/
+    width: 25%;
     flex-direction: column;
-    -webkit-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
-        -moz-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
-        box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
+    animation: slideIn 0.2s ease-in;
+    -webkit-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+        -moz-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+        box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%)
+    } to {
+        transform: translateX(0);
+    }
 }
 
 .sidebar .profile {
@@ -250,10 +259,7 @@ body {
 }
 
 .sidebar {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    width: 25%;
+
 }
 
 .scrollbar {
@@ -272,7 +278,7 @@ body {
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-    background-color: #ffffff;
+    background-color: #000000;
 }
 
 .sidebar button {
@@ -483,6 +489,7 @@ input:focus-visible {
 
 .contact-box {
     display: flex;
+    flex-grow: 1;
     flex-flow: nowrap column;
 }
 
@@ -495,6 +502,7 @@ input:focus-visible {
     z-index: 500;
     text-align: right;
     right: 0;
+    font-size: 0.8rem;
     bottom: 0;
 }
 #chat-text-input {
@@ -541,9 +549,14 @@ input:focus-visible {
     border-radius: 3px;
     justify-content: space-between;
     overflow: hidden;
-    max-width: 60vw;
+    width: 60vw;
+    /* margin-left: auto; */
     min-height: 70vh;
     margin-bottom: 1rem;
+    /* -webkit-box-shadow: 1px 0px 2px 0px rgba(171, 171, 171, 1);
+        -moz-box-shadow: 1px 0px 2px 0px rgba(171, 171, 171, 1);
+        box-shadow: 1px 0px 2px 0px rgba(171, 171, 171, 1); */
+    /* background:rgba(171, 171, 171, 1); */
 }
         
 #image {
@@ -551,6 +564,10 @@ input:focus-visible {
     max-height: 95vh;
     margin-top: auto;
     margin-bottom: auto;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;
+    border-radius: 2px;
 }
         
 #content {

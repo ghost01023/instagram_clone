@@ -4,7 +4,6 @@ const { sendOnlineStatus } = require("./websocket_main")
 const loginUser = async (req, res, connection, clients) => {
     console.log("inside loginUser");
     console.log(req.body);
-    // console.log(req);
     const { usernameEmail, password } = req.body;
     let validCredentials = await checkLoginCredentials(usernameEmail, password, connection);
     if (!validCredentials) {

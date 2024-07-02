@@ -13,7 +13,7 @@ let connection;
 /////////////////////////////////
 //////IMPORTED CUSTOM MODULES////
 /////////////////////////////////
-const { handleWebSocketConnections } = require("./server_scripts/websocket_main");
+const { handleWebSocketConnections, signOutUser } = require("./server_scripts/websocket_main");
 const { loginUser } = require("./server_scripts/user_login");
 const { registerUser } = require("./server_scripts/user_signup");
 const { authenticateUser } = require("./server_scripts/authenticate");
@@ -73,12 +73,22 @@ app.get("/messagesInnerHTML", (_req, res) => {
 }
 )
 
-// GET ROUTE FOR FEED POSTS INNER HTML
-app.get("/feedPostsInnerHTML", (req, res) => {
-
+//GET ROUTE FOR MAIN PAGE INNER HTML
+app.get("/signOut", async (req, res) => {
+    const signOutStatus = await signOutUser(req, connection);
+    if (signOutStatus) {
+        res.sendFile(__dirname + "/public/index.html");
+    }
+    console.log("user wants to sign out");
+    // res.sendFile(__dirname + "/public/index.html");
 })
 
-//GET ROUTE FOR MAIN PAGE INNER HTML
+//DEFAULT ROUTE
+app.get("/", (req, res) => {
+    console.log("user wants to sign out");
+    res.sendFile(__dirname + "/public/index.html");
+    // res.sendFile(__dirname + "/public/index.html");
+})
 app.get("/mainPageInnerHTML", (_req, res) => {
     console.log("XMLHttp request made for mainPage.html");
     sendInnerHTML("main_page.html", res);
@@ -128,10 +138,10 @@ const sendInnerHTML = (pageName, res) => {
 // GET ROUTE FOR POST IMAGES
 
 app.get("/postImage/:postID", (req, res) => {
-    console.log("user has made postimage request");
-    const postID = req.params.postID;
+    console.log("user has made postImage request");
+    const postID = req.params["postID"];
     const fetchImageBlobQuery = `SELECT post_image FROM posts WHERE post_id=${postID};`;
-    console.log(fetchImageBlobQuery);
+    // console.log(fetchImageBlobQuery);
     connection.query(fetchImageBlobQuery, (error, result) => {
         if (error) {
             console.log("Error in fetchImageBlobQuery");
@@ -147,6 +157,30 @@ app.get("/postImage/:postID", (req, res) => {
             }
         )
 
+    })
+})
+
+app.get("/profilePicture/:username", (req, res) => {
+    let username = req.params.username;
+    if (username === "self") {
+        username = cookie.parse(req.headers.cookie || "seltzer");
+        res.sendFile(__dirname + "/public/assets/default_profile.svg");
+        return;
+    }
+    const profilePictureQuery = `SELECT profile_picture FROM users WHERE username="${username}"`;
+    connection.query(profilePictureQuery, (error, results) => {
+        if (error) {
+            console.log("Could not fetch profile picture");
+            console.log(error);
+        } else {
+            const imagePresent = results[0]["profile_picture"];
+            if (imagePresent !== null) {
+                const base64ProfilePicture = results[0]["profile_picture"].toString("utf8");
+                res.json({ "imagePresent": true, "base64ProfilePicture": base64ProfilePicture });
+            } else {
+                res.json({ "imagePresent": false });
+            }
+        }
     })
 })
 
@@ -190,9 +224,9 @@ app.post("/signup", upload.none(), (req, res) => {
     registerUser(req, res, connection);
 })
 
-app.post("/login", upload.none(), (req, res) => {
+app.post("/login", upload.none(), async (req, res) => {
     console.log("login post request has been made");
-    loginUser(req, res, connection, clients);
+    const loginState = loginUser(req, res, connection, clients);
 })
 
 
@@ -204,6 +238,6 @@ app.post("/login", upload.none(), (req, res) => {
 
 
 // MAIN GET ROUTE FOR WEBAPP HTML
-app.get("*", (_req, res) => {
-    res.sendFile(__dirname + "/public/index.html");
-})
+// app.get("*", (_req, res) => {
+//     res.sendFile(__dirname + "/public/index.html");
+// })
