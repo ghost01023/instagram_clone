@@ -5,6 +5,7 @@ let appState = {
     oldestMessageID: 0,
     lastPostReached: false,
     allChats: [],
+    allChatElements: []
 }
 
 //http (&&) websocket URL connections
@@ -229,18 +230,23 @@ ws.onmessage = (event) => {
         case "latestAllChats": {
             console.log(data["allChatsContent"]);
             appState.allChats = [];
+            appState.allChatElements = [];
             data["allChatsContent"].map(lastMessage => {
                 const {friend_name, message_content, message_date} = lastMessage;
                 appState.allChats.push(friend_name);
                 console.log(friend_name, message_content, message_date);
-                createContactDiv(friend_name, message_content, message_date);
+                const contactDiv = generateContactDiv(friend_name, message_content, message_date);
+                appState.allChatElements.push(contactDiv);
+            })
+            appState.allChatElements.map(element => {
+                document.querySelector(".contacts").appendChild(element);
             })
         }
             break;
         case "fetchedChat": {
             console.log("Chats with one user %s", data["target"]);
             console.log(data["chats"]);
-            renderCurrentChatHTML("/assets/default_profile.svg", data["target"], data["chats"], false);
+            setTimeout(() => {renderCurrentChatHTML("/assets/default_profile.svg", data["target"], data["chats"], false)}, 200);
         }
             break;
         case "userOnline": {
@@ -284,7 +290,6 @@ ws.onmessage = (event) => {
                         }
                     } else {
                         //IF THERE IS PREVIOUS CHAT HISTORY
-
                     }
                 }
             }
@@ -317,6 +322,12 @@ ws.onmessage = (event) => {
                     const lastChatTime = contactBlockDiv.querySelector(".contact-box>.chat-time");
                     contactLastChat.innerText = data["messageContent"];
                     lastChatTime.innerText = formatDateTime(data["messageDate"]);
+                } else {
+                    //IF THERE WAS NEVER ANY CHAT HISTORY
+                    const newContactDiv = generateContactDiv(data["sender"], data["messageContent"], data["messageDate"]);
+                    appState.allChats.unshift(data["sender"]);
+                    appState.allChatElements.unshift(newContactDiv);
+                    document.querySelector(".contacts").insertBefore(newContactDiv, document.querySelector(".contacts").firstChild);
                 }
             }
         }
@@ -347,13 +358,16 @@ ws.onmessage = (event) => {
             break;
         case "userSearchResults": {
             document.querySelector(".user-search-results").innerHTML = "";
-            console.log(d["userSearchResults"]);
-            d["userSearchResults"].map(user => {
+            console.log(data["userSearchResults"]);
+            data["userSearchResults"].map(user => {
                 const {username, is_followed, profile_picture} = user;
                 addUserToSearchResult(profile_picture, username, is_followed);
             })
         }
             break;
+        case "profileStats": {
+            renderUserProfilePage(data["username"], data);
+        }
     }
 }
 
@@ -591,6 +605,14 @@ const addFeedMenuEventListener = () => {
         if (uploadAreaDiv) {
             bodyDiv.removeChild(uploadAreaDiv);
         }
+        const exploreDiv = document.querySelector("#explore");
+        if (exploreDiv) {
+            bodyDiv.removeChild(exploreDiv);
+        }
+        const userProfileDiv = document.querySelector("#profile-container");
+        if (userProfileDiv) {
+            bodyDiv.removeChild(userProfileDiv);
+        }
         // REFRESH APP-STATE WITH OLDEST POST ID AND PAGE NAME
         appState.oldestPostID = 0;
         appState.currentMenu = "mainPage";
@@ -614,17 +636,14 @@ const addChatMenuEventListener = () => {
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const bodyDiv = document.querySelector("body");
-                const homeContentDiv = document.querySelector("#posts");
-                if (homeContentDiv) {
-                    bodyDiv.removeChild(homeContentDiv);
+                removeOtherMenus();
+                const exploreDiv = document.querySelector("#explore");
+                if (exploreDiv) {
+                    bodyDiv.removeChild(exploreDiv);
                 }
-                const containerDiv = document.querySelector(".container");
-                if (containerDiv) {
-                    bodyDiv.removeChild(containerDiv);
-                }
-                const uploadAreaDiv = document.querySelector(".upload-area");
-                if (uploadAreaDiv) {
-                    bodyDiv.removeChild(uploadAreaDiv);
+                const userProfileDiv = document.querySelector("#profile-container");
+                if (userProfileDiv) {
+                    bodyDiv.removeChild(userProfileDiv);
                 }
                 bodyDiv.insertAdjacentHTML("beforeend", xhr.responseText);
                 document.querySelector(".chat-self-username").innerText = getCookieValue("username");
@@ -639,9 +658,25 @@ const addChatMenuEventListener = () => {
 const addExploreMenuEventListener = () => {
     const exploreMenu = document.querySelector(".explore-menu");
     exploreMenu.addEventListener("click", () => {
-        if (["mainPage", "home", "messages", "create"].includes(appState.currentMenu)) {
-            console.log("Explore Menu. Coming Soon");
+        // console.log("Explore Menu. Coming Soon");
+        xhr.open("GET", serverURL + "/exploreMenuInnerHTML", true);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let exploreDiv = document.createElement("div");
+                exploreDiv.innerHTML = xhr.responseText;
+                bodyDiv.appendChild(exploreDiv.firstChild);
+                const exploreInput = document.querySelector(".user-search");
+                exploreInput.addEventListener("keydown", (event) => {
+                    console.log(event.key);
+                    exploreDiv = document.querySelector("#explore");
+                    if (event.key === 'Escape' || event.key === 'Esc') {
+                        bodyDiv.removeChild(exploreDiv);
+                    }
+                })
+                addUserSearchEventListener()
+            }
         }
+        xhr.send();
     });
 }
 
@@ -669,6 +704,14 @@ const addCreateMenuEventListener = () => {
             if (feedDiv) {
                 feedDiv.style.filter = "none";
             }
+            const exploreDiv = document.querySelector("#explore");
+            if (exploreDiv) {
+                bodyDiv.removeChild(exploreDiv);
+            }
+            const userProfileDiv = document.querySelector("#profile-container");
+            if (userProfileDiv) {
+                bodyDiv.removeChild(userProfileDiv);
+            }
             return;
         }
         xhr.open("GET", serverURL + "/imageUploadInnerHTML", true);
@@ -695,7 +738,6 @@ const addMenuEventListeners = () => {
     addChatMenuEventListener();
     addExploreMenuEventListener();
     addCreateMenuEventListener();
-    const bodyDiv = document.querySelector("body");
     document.querySelector(".sign-out").addEventListener("click", () => {
         console.log("Trying to sign out...");
         xhr.open("GET", serverURL + "/signOut", true);
@@ -780,6 +822,8 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
     mainDiv.appendChild(messagesDiv);
     mainDiv.appendChild(label);
     mainDiv.appendChild(button);
+    console.warn("OK TILL NOW");
+    console.log(chatWindow);
     chatWindow.appendChild(mainDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
     const chatTextInput = document.querySelector("#chat-text-input");
@@ -837,7 +881,7 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
     // messagesDiv.appendChild(chatSendButton);
 }
 
-renderMessageHTML = (messagesDiv, message, before) => {
+const renderMessageHTML = (messagesDiv, message, before) => {
     const messageReceivedDiv = document.createElement('div');
     if (message["msg_owner"] === "self") {
         messageReceivedDiv.className = 'message sent';
@@ -906,7 +950,7 @@ const getSignUpPage = () => {
     xhr.send();
 }
 
-const createContactDiv = (username, messageContent, messageDate) => {
+const generateContactDiv = (username, messageContent, messageDate) => {
     const contacts = document.querySelector(".contacts");
     const contactDiv = document.createElement('div');
     contactDiv.className = 'contact ' + username;
@@ -965,7 +1009,7 @@ const createContactDiv = (username, messageContent, messageDate) => {
             )
         )
     })
-    contacts.appendChild(contactDiv);
+    return contactDiv;
 }
 
 const formatDateTime = (datetimeString) => {
@@ -998,7 +1042,7 @@ const openNewChat = (username) => {
     chatMenu.dispatchEvent(new Event("click"));
     setTimeout(() => {
         renderCurrentChatHTML("/assets/default_profile.svg", username, null)
-    }, 100);
+    }, 200);
 }
 
 const getCookieValue = (cookieName) => {
@@ -1017,22 +1061,60 @@ const addUserSearchEventListener = () => {
         ws.send(
             JSON.stringify(
                 {
-                    "messageType": "userSearch",
-                    "name": event.target["value"]
+                    "messageType": "searchUsers",
+                    "name": event.target["value"],
+                    "cookieContent": document.cookie
                 }
             )
         )
     })
 }
 
+const removeOtherMenus = () => {
+    const homeContentDiv = document.querySelector("#posts");
+    if (homeContentDiv) {
+        bodyDiv.removeChild(homeContentDiv);
+    }
+    const containerDiv = document.querySelector(".container");
+    if (containerDiv) {
+        bodyDiv.removeChild(containerDiv);
+    }
+    const uploadAreaDiv = document.querySelector(".upload-area");
+    if (uploadAreaDiv) {
+        bodyDiv.removeChild(uploadAreaDiv);
+    }
+}
 const addUserToSearchResult = (profileSrc, username, follows) => {
     const searchResultUser = document.createElement("div");
     //ADD ACTUAL USERNAME AS ID UPON WS.ONMESSAGEREQ
     searchResultUser.className = "search-result user " + username;
+    searchResultUser.addEventListener("click", (event) => {
+        xhr.open("GET", serverURL + "/userProfileInnerHTML");
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                removeOtherMenus();
+                const profileDiv = document.createElement("div");
+                const exploreDiv = document.querySelector("#explore");
+                bodyDiv.removeChild(exploreDiv);
+                profileDiv.innerHTML = xhr.responseText;
+                bodyDiv.appendChild(profileDiv.firstChild);
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "messageType": "profileStats",
+                            "username": username,
+                            "cookieContent": document.cookie
+                        }
+                    )
+                )
+            }
+        }
+        xhr.send();
+    })
     const searchResultProfile = document.createElement("img");
     //SET SRC UPON WS.ONMESSAGEREQ
     if (profileSrc === null) {
-        searchResultProfile.src = "/public/user/Instagram.jpg";
+        searchResultProfile.src = "../assets/default_profile.svg";
     } else {
         searchResultProfile.src = profileSrc;
     }
@@ -1062,5 +1144,52 @@ const addSearchChatEventListener = () => {
         const filteredContactNames = appState.allChats.filter(contactName => contactName.indexOf(event.target[value]) > -1);
         // for (let i = 0; i < )
     });
-    createContactDiv(friend_name, message_content, message_date);
+    generateContactDiv(friend_name, message_content, message_date);
+}
+
+
+const renderUserProfilePage = (username, data) => {
+    let {bio, total_followers, total_following, total_posts} = data["profileStats"];
+    const profileName = document.querySelector("#profile-name");
+    profileName.innerHTML = username;
+    const totalFollowers = document.querySelector("#total-followers");
+    let statSpan = document.createElement("span");
+    statSpan.className = "stat-span";
+    statSpan.innerHTML = total_followers;
+    totalFollowers.innerHTML = "";
+    totalFollowers.appendChild(statSpan);
+    totalFollowers.innerHTML += " followers";
+    const totalFollowing = document.querySelector("#total-following");
+    statSpan = document.createElement("span");
+    statSpan.className = "stat-span";
+    statSpan.innerHTML = total_following;
+    totalFollowing.innerHTML = "";
+    totalFollowing.appendChild(statSpan);
+    totalFollowing.innerHTML += " following";
+    const totalPosts = document.querySelector("#total-posts");
+    statSpan = document.createElement("span");
+    statSpan.className = "stat-span";
+    statSpan.innerHTML = total_posts;
+    totalPosts.innerHTML = "";
+    totalPosts.appendChild(statSpan);
+    totalPosts.innerHTML += " posts";
+    const followButton = document.querySelector("#follow-button");
+    const messageButton = document.querySelector("#message-button");
+    messageButton.addEventListener("click", () => {
+        const chatMenu = document.querySelector(".messages-menu");
+        chatMenu.dispatchEvent(new Event("click"));
+        ws.send(
+            JSON.stringify(
+                {
+                    "messageType": "fetchChat",
+                    "target": username,
+                    "oldestMessageID": 0,
+                    "cookieContent": document.cookie
+                }
+            )
+        )
+        // openNewChat(username);
+    })
+    const bioDiv = document.querySelector("#bio");
+    bioDiv.innerHTML = bio;
 }

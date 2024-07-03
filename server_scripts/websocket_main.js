@@ -41,7 +41,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         verificationStatus: false
                     }
                 ))
-                return;
+                // return;
             } else {
                 if (!clients.get(username)) {
                     clients.set(username, ws);
@@ -49,7 +49,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                 }
             }
             switch (true) {
-                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "unLikePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "latestAllChats", "typing", "notTyping"].includes(data["messageType"]): {
+                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "unLikePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "latestAllChats", "typing", "notTyping", "profileStats"].includes(data["messageType"]): {
                     switch (data["messageType"]) {
                         case "verificationStatus": {
                             console.log("%s ASKED FOR VERIFICATION STATUS", username);
@@ -92,6 +92,29 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                             //SEND RESULTS
                         }
                             break;
+                        case "profileStats": {
+                            const username = data["username"];
+                            const profileStatsQuery = `SELECT u.username, u.bio, u.date_of_birth AS birthday, u.date_of_joining AS joindate, CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name) AS full_name, COALESCE(followers.total_followers, 0) AS total_followers, COALESCE(following.total_following, 0) AS total_following, COALESCE(posts.total_posts, 0) AS total_posts FROM users u LEFT JOIN ( SELECT followee, COUNT(*) AS total_followers FROM follows GROUP BY followee ) AS followers ON u.id = followers.followee LEFT JOIN ( SELECT follower, COUNT(*) AS total_following FROM follows GROUP BY follower ) AS following ON u.id = following.follower LEFT JOIN ( SELECT post_user, COUNT(*) AS total_posts FROM posts GROUP BY post_user ) AS posts ON u.id = posts.post_user WHERE u.username = '${username}';`;
+                            // console.log(profileStatsQuery);
+                            connection.query(profileStatsQuery, (error, result) => {
+                                if (error) {
+                                    console.log("Error fetching profile stats");
+                                    console.log(error);
+                                } else {
+                                    console.log("Sending userStats result");
+                                    console.log(result);
+                                    ws.send(
+                                        JSON.stringify(
+                                            {
+                                                "messageType": "profileStats",
+                                                "profileStats": result[0],
+                                                "username": username
+                                            }
+                                        )
+                                    )
+                                }
+                            })
+                        } break;
                         case "searchUsers": {
                             const name = data["name"].trim();
                             if (name.length === 0) {

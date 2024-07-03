@@ -814,6 +814,8 @@ SEARCH USER PAGE
     justify-content: center;
     left: 50%;
     transform: translateX(-50%);
+    background-color: grey;
+    color: white;
 }
 
 .explore-field {}
@@ -852,4 +854,94 @@ input.user-search {
 
 .search-result-username {
     display: inline;
+}
+
+/* PROFILE VIEW */
+#profile-container {
+    position: absolute;
+    left: 20%;
+    width: 70%;
+    top: 10%;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+#profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-right: 6rem;
+    overflow: hidden;
+}
+
+#profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#profile-info {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+}
+
+#profile-name {
+    font-size: 2.7rem;
+    font-weight: bold;
+}
+
+#profile-stats {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+#profile-stats div {
+    font-size: 16px;
+}
+
+#profile-buttons {
+    display: flex;
+    gap: 10px;
+
+}
+
+#profile-buttons button {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 2rem;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.user-profile-header {
+    display: flex;
+
+    flex-flow: nowrap row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profile-stats {
+    font-size: 1.5rem;
+}
+
+.stat-span {
+    font-weight: bolder;
+    font-size: 2.5rem;
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
+}
+
+.link {
+
+}
+
+.link:hover {
+    cursor: pointer;
 }

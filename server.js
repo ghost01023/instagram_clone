@@ -84,6 +84,12 @@ app.get("/signOut", async (req, res) => {
     }
 })
 
+//GET ROUTE FOR EXPLORE MENU INNER HTML
+app.get("/exploreMenuInnerHTML", (_req, res) => {
+    console.log("User requested exploreMenuInnerHTML");
+    sendInnerHTML("explore.html", res);
+})
+
 //DEFAULT ROUTE
 app.get("/", (req, res) => {
     // console.log("user wants to sign out");
@@ -93,6 +99,10 @@ app.get("/", (req, res) => {
 app.get("/mainPageInnerHTML", (_req, res) => {
     // console.log("XMLHttp request made for mainPage.html");
     sendInnerHTML("main_page.html", res);
+})
+
+app.get("/userProfileInnerHTML", (_req, res) => {
+    sendInnerHTML("profile_container.html", res);
 })
 
 //GET ROUTE FOR LOGIN PAGE
