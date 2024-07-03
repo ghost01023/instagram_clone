@@ -13,10 +13,10 @@ let connection;
 /////////////////////////////////
 //////IMPORTED CUSTOM MODULES////
 /////////////////////////////////
-const { handleWebSocketConnections, signOutUser } = require("./server_scripts/websocket_main");
-const { loginUser } = require("./server_scripts/user_login");
-const { registerUser } = require("./server_scripts/user_signup");
-const { authenticateUser } = require("./server_scripts/authenticate");
+const {handleWebSocketConnections, signOutUser, sendOnlineStatus} = require("./server_scripts/websocket_main");
+const {loginUser} = require("./server_scripts/user_login");
+const {registerUser} = require("./server_scripts/user_signup");
+const {authenticateUser} = require("./server_scripts/authenticate");
 // const { MySQLConnectionManager } = require("./server_scripts/try_conn");
 /////////////////////////////////
 /////////////////////////////////
@@ -68,47 +68,48 @@ app.listen(5000, () => {
 
 // GET ROUTE FOR MESSAGES/CHATS HTML
 app.get("/messagesInnerHTML", (_req, res) => {
-    console.log("XMLHttp request made for chat.html");
-    sendInnerHTML("chat.html", res);
-}
+        // console.log("XMLHttp request made for chat.html");
+        sendInnerHTML("chat.html", res);
+    }
 )
 
 //GET ROUTE FOR MAIN PAGE INNER HTML
 app.get("/signOut", async (req, res) => {
     const signOutStatus = await signOutUser(req, connection);
+    const username = cookie.parse(req.headers.cookie || "")["username"];
     if (signOutStatus) {
+        clients.delete(username);
+        sendOnlineStatus(username, clients, connection, false);
         res.sendFile(__dirname + "/public/index.html");
     }
-    console.log("user wants to sign out");
-    // res.sendFile(__dirname + "/public/index.html");
 })
 
 //DEFAULT ROUTE
 app.get("/", (req, res) => {
-    console.log("user wants to sign out");
+    // console.log("user wants to sign out");
     res.sendFile(__dirname + "/public/index.html");
     // res.sendFile(__dirname + "/public/index.html");
 })
 app.get("/mainPageInnerHTML", (_req, res) => {
-    console.log("XMLHttp request made for mainPage.html");
+    // console.log("XMLHttp request made for mainPage.html");
     sendInnerHTML("main_page.html", res);
 })
 
 //GET ROUTE FOR LOGIN PAGE
 app.get("/logInPageInnerHTML", (_req, res) => {
-    console.log("XMLHttp request made for loginpage.html");
+    // console.log("XMLHttp request made for loginpage.html");
     sendInnerHTML("login_form.html", res);
 })
 
 //GET ROUTE FOR SIGNUP PAGE
 app.get("/signUpPageInnerHTML", (_req, res) => {
-    console.log("XMLHttp request made for signup.html");
+    // console.log("XMLHttp request made for signup.html");
     sendInnerHTML("signup_form.html", res);
 })
 
 //GET ROUTE FOR POST UPLOAD HTML
 app.get("/imageUploadInnerHTML", (_req, res) => {
-    console.log("XMLHttp request made for upload_area.html");
+    // console.log("XMLHttp request made for upload_area.html");
     sendInnerHTML("upload_area.html", res);
 })
 
@@ -128,7 +129,7 @@ const sendInnerHTML = (pageName, res) => {
                     }
                 ))
             } else {
-                console.log("Sending innerHTML of %s", pageName);
+                // console.log("Sending innerHTML of %s", pageName);
                 res.send(data)
             }
         }
@@ -138,7 +139,6 @@ const sendInnerHTML = (pageName, res) => {
 // GET ROUTE FOR POST IMAGES
 
 app.get("/postImage/:postID", (req, res) => {
-    console.log("user has made postImage request");
     const postID = req.params["postID"];
     const fetchImageBlobQuery = `SELECT post_image FROM posts WHERE post_id=${postID};`;
     // console.log(fetchImageBlobQuery);
@@ -148,9 +148,7 @@ app.get("/postImage/:postID", (req, res) => {
             console.log(error);
             return;
         }
-        console.log(result[0]);
         const base64Image = result[0]["post_image"].toString("utf8");
-        console.log(base64Image.substring(1, 50));
         res.json(
             {
                 postImage: base64Image
@@ -176,9 +174,9 @@ app.get("/profilePicture/:username", (req, res) => {
             const imagePresent = results[0]["profile_picture"];
             if (imagePresent !== null) {
                 const base64ProfilePicture = results[0]["profile_picture"].toString("utf8");
-                res.json({ "imagePresent": true, "base64ProfilePicture": base64ProfilePicture });
+                res.json({"imagePresent": true, "base64ProfilePicture": base64ProfilePicture});
             } else {
-                res.json({ "imagePresent": false });
+                res.json({"imagePresent": false});
             }
         }
     })
@@ -197,8 +195,7 @@ app.post("/uploadPost", upload.none(), async (req, res) => {
     }
     if (imageBlob.length < 1000) {
         return;
-    }
-    else {
+    } else {
         console.log("image blob received.");
         imageBlob = imageBlob.replaceAll('"', '\\"');
     }

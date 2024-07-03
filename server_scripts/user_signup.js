@@ -1,7 +1,8 @@
 const registerUser = (req, res, connection) => {
+    console.log("Inside registerUser()");
     // let { email, fullName, username, password } = req.body;
-    // let credentails = [email, fullName, username, password];
-    const credentails = Object.values(req.body).map(val => {
+    // let credentials = [email, fullName, username, password];
+    const credentials = Object.values(req.body).map(val => {
         console.log(val);
         val = val.trim();
         if (val.length === 0) {
@@ -10,7 +11,7 @@ const registerUser = (req, res, connection) => {
             return val;
         }
     });
-    const [email, fullName, username, password] = credentails;
+    const [email, fullName, username, password] = credentials;
     let firstName = fullName;
     let middleName = null;
     let lastName = null;

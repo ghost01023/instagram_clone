@@ -6,8 +6,6 @@ body {
 }
 
 
-
-
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
@@ -22,6 +20,16 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     width: 100vw;
     height: 100vh;
+    animation: growlogin 0.3s ease-in;
+}
+
+@keyframes growlogin {
+    from {
+        transform: scale(0.5);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
 .login-container,
@@ -65,15 +73,14 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 100%;
     transform: translateY(-50%);
     color: #aaa;
-    transition:
-top 0.2s ease,
-color 0.2s ease,
-font-size 0.2s ease;
+    transition: top 0.2s ease,
+    color 0.2s ease,
+    font-size 0.2s ease;
 }
 
-.logup-field input.dirty+.placeholder,
-.logup-field input:focus+.placeholder,
-.logup-field input:not(:placeholder-shown)+.placeholder {
+.logup-field input.dirty + .placeholder,
+.logup-field input:focus + .placeholder,
+.logup-field input:not(:placeholder-shown) + .placeholder {
     top: -10px;
     font-size: 10px;
     color: #222;
@@ -89,7 +96,7 @@ font-size 0.2s ease;
     transition: border-color 0.2s ease;
 }
 
-.logup-field input+.placeholder {
+.logup-field input + .placeholder {
     left: 8px;
     padding: 0 5px;
 }
@@ -101,9 +108,9 @@ font-size 0.2s ease;
 
 }
 
-.logup-field input.dirty+.placeholder,
-.logup-field input:not(:placeholder-shown)+.placeholder,
-.logup-field input:focus+.placeholder {
+.logup-field input.dirty + .placeholder,
+.logup-field input:not(:placeholder-shown) + .placeholder,
+.logup-field input:focus + .placeholder {
     top: 0;
     font-size: 10px;
     color: #222;
@@ -182,7 +189,7 @@ body {
 }
 
 .animate.pop {
-    
+
 }
 
 @keyframes animate-pop {
@@ -199,7 +206,7 @@ body {
 
 .container {
     height: 100vh;
-    width: 100vw;
+    width: 80%;
     overflow-x: hidden;
     position: absolute;
     left: 20%;
@@ -221,14 +228,15 @@ body {
     flex-direction: column;
     animation: slideIn 0.2s ease-in;
     -webkit-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
-        -moz-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
-        box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+    -moz-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+    box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
 }
 
 @keyframes slideIn {
     from {
         transform: translateX(-100%)
-    } to {
+    }
+    to {
         transform: translateX(0);
     }
 }
@@ -383,6 +391,32 @@ body {
     border-bottom-left-radius: 0;
 }
 
+@keyframes leftslidein {
+    from {
+        transform: translateX(-50%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.messages .message .received .new-message {
+    animation: leftslidein 0.5s ease-in-out;
+}
+
+@keyframes bottomslideup {
+    from {
+        transform: translateY(-50%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.messages .message .sent .new-message {
+    animation: bottomslideup 0.5s ease-in-out;
+}
+
 @keyframes gradient {
     0% {
         background-position: 0% 50%;
@@ -402,8 +436,8 @@ body {
     /* padding: 20px;
     border-top: 1px solid #3c3c3c; */
     -webkit-box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
-        -moz-box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
-        box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
+    -moz-box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
+    box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
 }
 
 .main .input-area input {
@@ -430,7 +464,6 @@ input:focus-visible {
 .main .input-area button {
     padding: 10px;
     background-color: #4BB4F8;
-    border-color: #4BB4F8;
     border: none;
     border-radius: 5px;
     color: white;
@@ -493,7 +526,7 @@ input:focus-visible {
     flex-flow: nowrap column;
 }
 
-.contact-box>.contact-name {
+.contact-box > .contact-name {
     font-weight: bolder;
 }
 
@@ -505,8 +538,9 @@ input:focus-visible {
     font-size: 0.8rem;
     bottom: 0;
 }
+
 #chat-text-input {
-    width: 70%;
+    width: 60%;
     font-size: 1.4rem;
 }
 
@@ -527,10 +561,12 @@ input:focus-visible {
 @keyframes slideUp {
     from {
         transform: translateY(100%);
-    } to {
+    }
+    to {
         transform: translateY(0);
     }
 }
+
 #posts {
     margin-left: auto;
     animation: slideUp 0.3s ease-in-out;
@@ -539,9 +575,8 @@ input:focus-visible {
     flex-flow: nowrap column;
     align-items: center;
 }
-        
-        
-        
+
+
 #post {
     display: flex;
     background-color: #fff;
@@ -558,7 +593,7 @@ input:focus-visible {
         box-shadow: 1px 0px 2px 0px rgba(171, 171, 171, 1); */
     /* background:rgba(171, 171, 171, 1); */
 }
-        
+
 #image {
     max-width: 65%;
     max-height: 95vh;
@@ -569,7 +604,7 @@ input:focus-visible {
     background-color: black;
     border-radius: 2px;
 }
-        
+
 #content {
     padding: 14px;
     width: 35%;
@@ -578,30 +613,30 @@ input:focus-visible {
     border-left: 1px solid #dbdbdb;
 }
 
-        
+
 #header {
     display: flex;
     align-items: center;
     margin-bottom: 1.5rem;
 }
-        
+
 #header img {
     border-radius: 50%;
     width: 32px;
     height: 32px;
     margin-right: 10px;
 }
-        
+
 #header div {
     font-weight: bold;
 }
-        
+
 #text {
     flex-grow: 1;
     overflow: hidden;
     position: relative;
 }
-        
+
 #text p {
     margin: 0;
     max-height: 80vh;
@@ -611,32 +646,64 @@ input:focus-visible {
     padding-right: 15px;
     /* Add space for hidden scrollbar */
 }
-        
+
 #text p::-webkit-scrollbar {
     width: 0;
     /* Remove scrollbar width */
     background: transparent;
     /* Optional: Add background if needed */
 }
-        
+
 #icons {
     display: flex;
     align-items: center;
     margin-top: 10px;
 }
-        
+
 #icons img {
     width: 24px;
     height: 24px;
     margin-right: 10px;
     cursor: pointer;
 }
-        
+
+@keyframes fillAnimation {
+    0% {
+        scale: 1;
+    }
+    100% {
+        scale: 1.3;
+    }
+}
+
+@keyframes unfillAnimation {
+    0% {
+        scale: 1.3;
+    }
+    100% {
+        scale: 1;
+    }
+}
+
+.filled-path {
+    fill: blue;
+}
+
+.liked {
+    animation: fillAnimation 0.2s ease-in;
+    scale: 1.3;
+}
+
+.notLiked {
+    animation: unfillAnimation 0.2s ease-in;
+    scale: 1;
+}
+
 #likes {
     font-weight: bold;
     margin-top: 8px;
 }
-        
+
 #date {
     color: #8e8e8e;
     font-size: 12px;
@@ -711,10 +778,78 @@ POST UPLOAD
     margin-top: 0.4rem;
 }
 
+.button-enabled {
+    background-color: #007bff;
+}
+
+.button-enabled:hover {
+    background-color: #178bff;
+}
+
+.button-enabled:active {
+    background-color: #3b92f1;
+}
+
 .select-image {
     margin-bottom: 1rem;
 }
 
 .select-image.remove {
     background-color: red;
+}
+
+
+/*
+
+SEARCH USER PAGE
+
+ */
+#explore {
+    position: absolute;
+    display: block;
+    top: 2rem;
+    width: 500px;
+    display: flex;
+    flex-flow: nowrap column;
+    justify-content: center;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.explore-field {}
+
+input.user-search {
+    width: 500px;
+    margin-bottom: 1rem;
+}
+
+.user-search-results {
+    display: flex;
+    flex-flow: nowrap column;
+    gap: 0.5rem;
+    width: 500px;
+    border: 1px solid #DDD;
+    border-radius: 2px;
+    padding: 0 12px;
+}
+
+.search-result.user {
+    display: grid;
+    padding-left: 1.5rem;
+    min-width: calc(500px - 1.5rem);
+    grid-template-columns: 1.5fr 6fr 2.5fr;
+    flex-flow: nowrap row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid #DDD;
+}
+
+.search-result-profile {
+    width: 40px;
+    height: 40px;
+}
+
+.search-result-username {
+    display: inline;
 }
