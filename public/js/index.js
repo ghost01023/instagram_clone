@@ -113,6 +113,14 @@ const createInstagramPost = (postID, postCaption, postLikes, postDate, postUser,
         document.querySelector("body").appendChild(posts);
     }
     posts.appendChild(post);
+    profileImg.addEventListener('click', () => {
+        console.log("will call createUserProfilePage");
+        createUserProfilePage(postUser);
+    })
+    username.classList.add("link");
+    username.addEventListener('click', () => {
+        createUserProfilePage(postUser);
+    })
     likeIcon.addEventListener("click", (event) => {
         console.log("Like status is %s", event.target.classList.contains("liked"));
         // if (event.target.classList.contains("liked")) {
@@ -194,6 +202,8 @@ ws.onmessage = (event) => {
                         bodyDiv.innerHTML = xhr.responseText;
                         const homeMenu = document.querySelector(".home-menu");
                         addMenuEventListeners();
+                        const profileOption = document.querySelector(".user-profile>p");
+                        profileOption.innerHTML = `<h2>Welcome</h2><span>@</span>${getCookieValue("username")}`;
                         homeMenu.dispatchEvent(new Event("click"));
                         appState.currentMenu = "mainPage";
                     }
@@ -220,11 +230,36 @@ ws.onmessage = (event) => {
         }
             break;
         case "followedUser": {
+            const target = data["target"];
             console.log("Followed %s", data["target"]);
+            console.log("From menu %s:", data["menuRequest"]);
+            const menu = data["menuRequest"];
+            if (menu === "profilePage") {
+                document.querySelector("#follow-button").innerHTML = "Unfollow"
+                const followersCount = document.querySelector("#total-followers>.stat-span");
+                followersCount.innerHTML = (parseInt(followersCount.innerHTML) + 1).toString();
+            }
+            if (menu === "userSearchResult") {
+                console.log("Will change to unfollow");
+                document.querySelector(`.user-search-results>.${target}>button`).innerHTML = "Unfollow"
+            }
         }
             break;
         case "unFollowedUser": {
+            const target = data["target"];
             console.log("Unfollowed user is %s", data["target"]);
+            console.log("From menu: %s", data["menuRequest"]);
+            const menu = data["menuRequest"];
+            if (menu === "profilePage") {
+                const followersCount = document.querySelector("#total-followers>.stat-span");
+                followersCount.innerHTML = (parseInt(followersCount.innerHTML) - 1).toString();
+                document.querySelector("#follow-button").innerHTML = "Follow"
+            }
+            if (menu === "userSearchResult") {
+                console.log(`.user-search-results>.${target}>button`);
+                console.log("Will change to follow");
+                document.querySelector(`.user-search-results>.${target}>button`).innerHTML = "Follow"
+            }
         }
             break;
         case "latestAllChats": {
@@ -246,23 +281,41 @@ ws.onmessage = (event) => {
         case "fetchedChat": {
             console.log("Chats with one user %s", data["target"]);
             console.log(data["chats"]);
-            setTimeout(() => {renderCurrentChatHTML("/assets/default_profile.svg", data["target"], data["chats"], false)}, 200);
+            setTimeout(() => {
+                renderCurrentChatHTML("/assets/default_profile.svg", data["target"], data["chats"], false)
+            }, 200);
         }
             break;
         case "userOnline": {
             console.log("%s is now online", data["username"]);
+            if (appState.currentChat === data["username"]) {
+                const userStatusSpan = document.querySelector(".user-status");
+                userStatusSpan.innerHTML = "online";
+            }
         }
             break;
         case "userOffline": {
             console.log("%s is now offline", data["username"]);
+            if (appState.currentChat === data["username"]) {
+                const userStatusSpan = document.querySelector(".user-status");
+                userStatusSpan.innerHTML = "offline";
+            }
         }
             break;
         case "userTyping": {
             console.log("%s is typing... a message to you", data["target"]);
+            if (appState.currentChat === data["target"]) {
+                const userStatusSpan = document.querySelector(".user-status");
+                userStatusSpan.innerHTML = "typing...";
+            }
         }
             break;
         case "userNotTyping": {
             console.log("%s has stopped typing a message to you", data["target"]);
+            if (appState.currentChat === data["target"]) {
+                const userStatusSpan = document.querySelector(".user-status");
+                userStatusSpan.innerHTML = "online";
+            }
         }
             break;
         case "messageSentStatus": {
@@ -367,7 +420,31 @@ ws.onmessage = (event) => {
             break;
         case "profileStats": {
             renderUserProfilePage(data["username"], data);
+            console.log("Will get profile stats for %s", data["profileStats"]["username"]);
+            ws.send(
+                JSON.stringify(
+                    {
+                        "messageType": "oneUserAllPosts",
+                        "target": data["profileStats"]["username"],
+                        "cookieContent": document.cookie
+                    }
+                )
+            )
         }
+            break;
+        case "oneUserAllPosts": {
+            console.log("Fetched all posts ever uploaded by %s", data["target"]);
+            const allPosts = data["oneUserAllPosts"];
+            allPosts.map(post => {
+                const postImage = document.createElement("img");
+                document.querySelector("#all-user-posts").appendChild(postImage);
+                fetch(serverURL + "/postImage/" + post["post_id"]).then(res => res.json()).then(data => {
+                    postImage.src = data["postImage"];
+                })
+                console.log(allPosts)
+            })
+        }
+            break;
     }
 }
 
@@ -658,6 +735,39 @@ const addChatMenuEventListener = () => {
 const addExploreMenuEventListener = () => {
     const exploreMenu = document.querySelector(".explore-menu");
     exploreMenu.addEventListener("click", () => {
+        const containerDiv = document.querySelector(".container");
+        const userProfileDiv = document.querySelector("#profile-container");
+        const feedDiv = document.querySelector("#posts");
+        const exploreDiv = document.querySelector("#explore");
+        if (exploreDiv) {
+            document.querySelector("body").removeChild(exploreDiv);
+            if (containerDiv) {
+                containerDiv.style.filter = "none";
+            }
+            if (feedDiv) {
+                feedDiv.style.filter = "none";
+            }
+            if (userProfileDiv) {
+                userProfileDiv.style.filter = "none";
+            }
+            bodyDiv.removeChild(exploreDiv);
+            return;
+        } else {
+            if (userProfileDiv) {
+                userProfileDiv.style.filter = "blue(2px)";
+            }
+            if (containerDiv) {
+                containerDiv.style.filter = "blur(2px)";
+            }
+            if (feedDiv) {
+                feedDiv.style.filter = "blur(2px)";
+            }
+            const uploadAreaDiv = document.querySelector(".upload-area");
+            if (uploadAreaDiv) {
+                bodyDiv.removeChild(uploadAreaDiv);
+            }
+        }
+
         // console.log("Explore Menu. Coming Soon");
         xhr.open("GET", serverURL + "/exploreMenuInnerHTML", true);
         xhr.onreadystatechange = () => {
@@ -670,6 +780,7 @@ const addExploreMenuEventListener = () => {
                     console.log(event.key);
                     exploreDiv = document.querySelector("#explore");
                     if (event.key === 'Escape' || event.key === 'Esc') {
+                        console.log("removing...")
                         bodyDiv.removeChild(exploreDiv);
                     }
                 })
@@ -695,8 +806,16 @@ const addCreateMenuEventListener = () => {
         const containerDiv = document.querySelector(".container");
         const feedDiv = document.querySelector("#posts");
         const uploadArea = document.querySelector(".upload-area");
+        const userProfileDiv = document.querySelector("#profile-container");
         //REMOVE BLUR FILTERS ON ALL ELEMENT WINDOWS IF UPLOAD AREA IS PRESENTS
+        let exploreDiv = document.querySelector("#explore");
+        if (exploreDiv) {
+            bodyDiv.removeChild(exploreDiv);
+        }
         if (uploadArea) {
+            if (userProfileDiv) {
+                userProfileDiv.style.filter = "none";
+            }
             document.querySelector("body").removeChild(uploadArea);
             if (containerDiv) {
                 containerDiv.style.filter = "none";
@@ -724,6 +843,9 @@ const addCreateMenuEventListener = () => {
                 }
                 if (feedDiv) {
                     feedDiv.style.filter = "blur(2px)";
+                }
+                if (userProfileDiv) {
+                    userProfileDiv.style.filter = "blue(2px)";
                 }
                 appState.currentMenu = "create";
                 addUploadImageEventListener();
@@ -777,8 +899,12 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
     let nameDiv = document.createElement('div');
     nameDiv.textContent = username;
 
+    const statusDiv = document.createElement("span");
+    statusDiv.classList.add("user-status");
+    statusDiv.innerHTML = "offline";
     headerDiv.appendChild(img);
     headerDiv.appendChild(nameDiv);
+    headerDiv.appendChild(statusDiv);
 
     let messagesDiv = document.createElement('div');
     messagesDiv.className = 'messages scrollbar';
@@ -818,6 +944,7 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
             renderMessageHTML(messagesDiv, message, true);
         })
     }
+
     appState.currentChat = username;
     mainDiv.appendChild(messagesDiv);
     mainDiv.appendChild(label);
@@ -826,6 +953,13 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
     console.log(chatWindow);
     chatWindow.appendChild(mainDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    img.addEventListener("click", () => {
+        createUserProfilePage(username);
+    })
+    nameDiv.classList.add("link");
+    nameDiv.addEventListener("click", () => {
+        createUserProfilePage(username);
+    })
     const chatTextInput = document.querySelector("#chat-text-input");
     chatTextInput.addEventListener("focus", () => {
             ws.send(
@@ -908,36 +1042,28 @@ const renderMessageHTML = (messagesDiv, message, before) => {
     }
 }
 
-if (false) {
-    const followUserBtn = document.querySelector(".follow-user");
-    const target = document.querySelector(".profile-username");
-    followUserBtn.addEventListener("click", () => {
-        ws.send(
-            JSON.stringify(
-                {
-                    "messageType": "followUser",
-                    "target": target.innerText,
-                    "cookieContent": document.cookie
-                }
-            )
+const followUser = (username) => {
+    ws.send(
+        JSON.stringify(
+            {
+                "messageType": "followUser",
+                "target": username,
+                "cookieContent": document.cookie
+            }
         )
-    })
+    )
 }
 
-if (false) {
-    const unFollowUserBtn = document.querySelector(".unfollow-user");
-    const target = document.querySelector(".profile-username");
-    unFollowUserBtn.addEventListener("click", () => {
-        ws.send(
-            JSON.stringify(
-                {
-                    "messgageType": "unFollowUser",
-                    "target": target.innerText,
-                    "cookieContent": document.cookie
-                }
-            )
+const unFollowUser = (username) => {
+    ws.send(
+        JSON.stringify(
+            {
+                "messageType": "unFollowUser",
+                "target": username,
+                "cookieContent": document.cookie
+            }
         )
-    })
+    )
 }
 
 const getSignUpPage = () => {
@@ -1084,33 +1210,45 @@ const removeOtherMenus = () => {
         bodyDiv.removeChild(uploadAreaDiv);
     }
 }
+const createUserProfilePage = (username) => {
+    console.log("inside createUserProfilePage()");
+    console.log("will request stats for %s", username);
+    xhr.open("GET", serverURL + "/userProfileInnerHTML");
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            console.log("got");
+            console.log(xhr.responseText);
+            removeOtherMenus();
+            const profileDiv = document.createElement("div");
+            const exploreDiv = document.querySelector("#explore");
+            const profileContainer = document.querySelector("#profile-container");
+            if (profileContainer) {
+                bodyDiv.removeChild(profileContainer);
+            }
+            if (exploreDiv) {
+                bodyDiv.removeChild(exploreDiv);
+            }
+            profileDiv.innerHTML = xhr.responseText;
+            bodyDiv.appendChild(profileDiv.firstChild);
+            ws.send(
+                JSON.stringify(
+                    {
+                        "messageType": "profileStats",
+                        "username": username,
+                        "cookieContent": document.cookie
+                    }
+                )
+            )
+        }
+    }
+    xhr.send();
+}
+
 const addUserToSearchResult = (profileSrc, username, follows) => {
     const searchResultUser = document.createElement("div");
     //ADD ACTUAL USERNAME AS ID UPON WS.ONMESSAGEREQ
     searchResultUser.className = "search-result user " + username;
-    searchResultUser.addEventListener("click", (event) => {
-        xhr.open("GET", serverURL + "/userProfileInnerHTML");
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                removeOtherMenus();
-                const profileDiv = document.createElement("div");
-                const exploreDiv = document.querySelector("#explore");
-                bodyDiv.removeChild(exploreDiv);
-                profileDiv.innerHTML = xhr.responseText;
-                bodyDiv.appendChild(profileDiv.firstChild);
-                ws.send(
-                    JSON.stringify(
-                        {
-                            "messageType": "profileStats",
-                            "username": username,
-                            "cookieContent": document.cookie
-                        }
-                    )
-                )
-            }
-        }
-        xhr.send();
-    })
+
     const searchResultProfile = document.createElement("img");
     //SET SRC UPON WS.ONMESSAGEREQ
     if (profileSrc === null) {
@@ -1125,11 +1263,31 @@ const addUserToSearchResult = (profileSrc, username, follows) => {
     const followButton = document.createElement("button");
     // MODIFY ON BASIS OF FOLLOWING OR NOT FOLLOWING
     // SET ONCLICK LISTENER ACCORDINGLY
-    if (!follows) {
+    if (follows === "false") {
         followButton.innerHTML = "Follow";
     } else {
         followButton.innerHTML = "Unfollow";
     }
+    followButton.classList.add("submit-button");
+    searchResultProfile.addEventListener("click", () => {
+        createUserProfilePage(username)
+    });
+    searchResultUsername.addEventListener("click", () => {
+        createUserProfilePage(username)
+    });
+    followButton.addEventListener("click", () => {
+        console.log(follows);
+        ws.send(
+            JSON.stringify(
+                {
+                    "messageType": followButton.innerHTML === "Follow" ? "followUser" : "unFollowUser",
+                    "menuRequest": "userSearchResult",
+                    "target": username,
+                    "cookieContent": document.cookie
+                }
+            )
+        )
+    })
     searchResultUser.appendChild(searchResultProfile);
     searchResultUser.appendChild(searchResultUsername);
     searchResultUser.appendChild(followButton);
@@ -1149,9 +1307,11 @@ const addSearchChatEventListener = () => {
 
 
 const renderUserProfilePage = (username, data) => {
-    let {bio, total_followers, total_following, total_posts} = data["profileStats"];
+    console.log(data);
+    let {bio, total_followers, total_following, total_posts, self_follows_user} = data["profileStats"];
+    let targetUsername = data["profileStats"]["username"];
     const profileName = document.querySelector("#profile-name");
-    profileName.innerHTML = username;
+    profileName.innerHTML = targetUsername;
     const totalFollowers = document.querySelector("#total-followers");
     let statSpan = document.createElement("span");
     statSpan.className = "stat-span";
@@ -1174,7 +1334,12 @@ const renderUserProfilePage = (username, data) => {
     totalPosts.appendChild(statSpan);
     totalPosts.innerHTML += " posts";
     const followButton = document.querySelector("#follow-button");
+    if (self_follows_user === "true") {
+        followButton.innerHTML = "Unfollow"
+    }
+    followButton.classList.add("submit-button");
     const messageButton = document.querySelector("#message-button");
+    messageButton.classList.add("submit-button");
     messageButton.addEventListener("click", () => {
         const chatMenu = document.querySelector(".messages-menu");
         chatMenu.dispatchEvent(new Event("click"));
@@ -1182,7 +1347,7 @@ const renderUserProfilePage = (username, data) => {
             JSON.stringify(
                 {
                     "messageType": "fetchChat",
-                    "target": username,
+                    "target": targetUsername,
                     "oldestMessageID": 0,
                     "cookieContent": document.cookie
                 }
@@ -1190,6 +1355,31 @@ const renderUserProfilePage = (username, data) => {
         )
         // openNewChat(username);
     })
+    followButton.addEventListener("click", () => {
+        ws.send(
+            JSON.stringify(
+                {
+                    "messageType": followButton.innerHTML === "Follow" ? "followUser" : "unFollowUser",
+                    "target": targetUsername,
+                    "menuRequest": "profilePage",
+                    "cookieContent": document.cookie
+                }
+            )
+        )
+    })
     const bioDiv = document.querySelector("#bio");
     bioDiv.innerHTML = bio;
+    // ws.send(
+    //     JSON.stringify(
+    //         {
+    //             "messageType": ""
+    //         }
+    //     )
+    // )
+    // const allUserPostsDiv = document.createElement("div");
+    // allUserPostsDiv.className = "scrollbar";
+    // allUserPostsDiv.id = "all-user-posts";
+    // const profileContainer = document.querySelector("#profile-container");
+    // profileContainer.appendChild(allUserPostsDiv);
+    //NOW FETCH AND INSERT IMAGES
 }

@@ -49,7 +49,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                 }
             }
             switch (true) {
-                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "unLikePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "latestAllChats", "typing", "notTyping", "profileStats"].includes(data["messageType"]): {
+                case ["fetchFeedPosts", "verificationStatus", "uploadPost", "likePost", "unLikePost", "searchUsers", "sendMessage", "followUser", "unFollowUser", "fetchImage", "fetchChat", "pingOnline", "latestAllChats", "typing", "notTyping", "profileStats", "oneUserAllPosts"].includes(data["messageType"]): {
                     switch (data["messageType"]) {
                         case "verificationStatus": {
                             console.log("%s ASKED FOR VERIFICATION STATUS", username);
@@ -93,9 +93,12 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "profileStats": {
-                            const username = data["username"];
-                            const profileStatsQuery = `SELECT u.username, u.bio, u.date_of_birth AS birthday, u.date_of_joining AS joindate, CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name) AS full_name, COALESCE(followers.total_followers, 0) AS total_followers, COALESCE(following.total_following, 0) AS total_following, COALESCE(posts.total_posts, 0) AS total_posts FROM users u LEFT JOIN ( SELECT followee, COUNT(*) AS total_followers FROM follows GROUP BY followee ) AS followers ON u.id = followers.followee LEFT JOIN ( SELECT follower, COUNT(*) AS total_following FROM follows GROUP BY follower ) AS following ON u.id = following.follower LEFT JOIN ( SELECT post_user, COUNT(*) AS total_posts FROM posts GROUP BY post_user ) AS posts ON u.id = posts.post_user WHERE u.username = '${username}';`;
+                            const target = data["username"];
+                            console.log(data);
+                            console.log("REQUESTED STATS FOR USER %s", target);
+                            // const profileStatsQuery = `SELECT u.username, u.bio, u.date_of_birth AS birthday, u.date_of_joining AS joindate, CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name) AS full_name, COALESCE(followers.total_followers, 0) AS total_followers, COALESCE(following.total_following, 0) AS total_following, COALESCE(posts.total_posts, 0) AS total_posts FROM users u LEFT JOIN ( SELECT followee, COUNT(*) AS total_followers FROM follows GROUP BY followee ) AS followers ON u.id = followers.followee LEFT JOIN ( SELECT follower, COUNT(*) AS total_following FROM follows GROUP BY follower ) AS following ON u.id = following.follower LEFT JOIN ( SELECT post_user, COUNT(*) AS total_posts FROM posts GROUP BY post_user ) AS posts ON u.id = posts.post_user WHERE u.username = '${target}';`;
                             // console.log(profileStatsQuery);
+                            const profileStatsQuery = `SELECT u.username, u.bio, u.date_of_birth AS birthday, u.date_of_joining AS joindate, CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name) AS full_name, COALESCE(followers.total_followers, 0) AS total_followers, COALESCE(following.total_following, 0) AS total_following, COALESCE(posts.total_posts, 0) AS total_posts, CASE WHEN EXISTS ( SELECT 1 FROM follows f WHERE f.follower = (SELECT id FROM users WHERE username = '${username}') AND f.followee = u.id ) THEN 'true' ELSE 'false' END AS self_follows_user FROM users u LEFT JOIN ( SELECT followee, COUNT(*) AS total_followers FROM follows GROUP BY followee ) AS followers ON u.id = followers.followee LEFT JOIN ( SELECT follower, COUNT(*) AS total_following FROM follows GROUP BY follower ) AS following ON u.id = following.follower LEFT JOIN ( SELECT post_user, COUNT(*) AS total_posts FROM posts GROUP BY post_user ) AS posts ON u.id = posts.post_user WHERE u.username = '${target}';`
                             connection.query(profileStatsQuery, (error, result) => {
                                 if (error) {
                                     console.log("Error fetching profile stats");
@@ -204,7 +207,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "followUser": {
-                            const {target} = data;
+                            const {target, menuRequest} = data;
                             const followUserQuery = `INSERT INTO follows (follower, followee) VALUE ((SELECT id FROM users WHERE username="${username}"), (SELECT id FROM users WHERE username="${target}"));`;
                             //SEND TRUE IF SUCCESSFUL
                             connection.query(followUserQuery, (error, result) => {
@@ -215,7 +218,8 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                                         JSON.stringify(
                                             {
                                                 "messageType": "followedUser",
-                                                "target": target
+                                                "target": target,
+                                                "menuRequest": menuRequest,
                                             }
                                         )
                                     )
@@ -224,7 +228,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "unFollowUser": {
-                            const {target} = data;
+                            const {target, menuRequest} = data;
                             console.log("request to unfollow user");
                             const unfollowUserQuery = `DELETE FROM follows WHERE (followee=(SELECT id FROM users WHERE username="${target}") AND follower=(SELECT id FROM users WHERE username="${username}"));`
                             console.log(unfollowUserQuery);
@@ -237,6 +241,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                                         JSON.stringify(
                                             {
                                                 "messageType": "unFollowedUser",
+                                                "menuRequest": menuRequest,
                                                 "target": target
                                             }
                                         )
@@ -283,6 +288,26 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                             })
                         }
                             break;
+                        case "oneUserAllPosts": {
+                            const {target} = data;
+                            console.log("Will fetch all posts for %s", target);
+                            const allPostsFetchQuery = `SELECT post_id FROM posts WHERE post_user=(SELECT id FROM users WHERE username="${target}") ORDER BY post_date DESC;`
+                            connection.query(allPostsFetchQuery, (error, result) => {
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    ws.send(
+                                        JSON.stringify(
+                                            {
+                                                "messageType": "oneUserAllPosts",
+                                                "target": target,
+                                                "oneUserAllPosts": result
+                                            }
+                                        )
+                                    )
+                                }
+                            })
+                        } break;
                         case "fetchImage": {
                             const {imageID} = data;
                             const fetchImageQuery = `SELECT post_image FROM posts WHERE post_id=${imageID};`;
