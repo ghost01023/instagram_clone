@@ -9,11 +9,11 @@ let appState = {
 }
 
 //http (&&) websocket URL connections
-const serverURL = "http://localhost:5000";
-const webSocketURL = "http://localhost:5050";
+// const serverURL = "http://localhost:5000";
+// const webSocketURL = "http://localhost:5050";
 
-// const serverURL = "http://192.168.145.235:5000";
-// const webSocketURL = "ws://192.168.145.235:5050";
+const serverURL = "j";
+const webSocketURL = "ws://192.168.76.235:5050";
 
 
 const containerDiv = document.querySelector(".app-container");
@@ -223,7 +223,7 @@ ws.onmessage = (event) => {
             }
             data["userFeedContent"].map(post => {
                 console.log(post);
-                const {post_id, post_caption, post_total_likes, post_username, post_date, has_liked} = post;
+                const { post_id, post_caption, post_total_likes, post_username, post_date, has_liked } = post;
                 createInstagramPost(post_id, post_caption, post_total_likes, post_date, post_username, has_liked);
             })
             console.log("Loaded all posts");
@@ -267,7 +267,7 @@ ws.onmessage = (event) => {
             appState.allChats = [];
             appState.allChatElements = [];
             data["allChatsContent"].map(lastMessage => {
-                const {friend_name, message_content, message_date} = lastMessage;
+                const { friend_name, message_content, message_date } = lastMessage;
                 appState.allChats.push(friend_name);
                 console.log(friend_name, message_content, message_date);
                 const contactDiv = generateContactDiv(friend_name, message_content, message_date);
@@ -413,7 +413,7 @@ ws.onmessage = (event) => {
             document.querySelector(".user-search-results").innerHTML = "";
             console.log(data["userSearchResults"]);
             data["userSearchResults"].map(user => {
-                const {username, is_followed, profile_picture} = user;
+                const { username, is_followed, profile_picture } = user;
                 addUserToSearchResult(profile_picture, username, is_followed);
             })
         }
@@ -489,15 +489,15 @@ const renderSignUpPageHTML = () => {
                 signUpFormSubmit(event);
             })
             document.querySelector(".switch-form-link").addEventListener("click", () => {
-                    ws.send(
-                        JSON.stringify(
-                            {
-                                "messageType": "verificationStatus",
-                                "cookieContent": document.cookie
-                            }
-                        )
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "messageType": "verificationStatus",
+                            "cookieContent": document.cookie
+                        }
                     )
-                }
+                )
+            }
             )
         }
     }
@@ -962,16 +962,16 @@ const renderCurrentChatHTML = (profilePicture, username, messages) => {
     })
     const chatTextInput = document.querySelector("#chat-text-input");
     chatTextInput.addEventListener("focus", () => {
-            ws.send(
-                JSON.stringify(
-                    {
-                        "messageType": "typing",
-                        "target": username,
-                        "cookieContent": document.cookie
-                    }
-                )
+        ws.send(
+            JSON.stringify(
+                {
+                    "messageType": "typing",
+                    "target": username,
+                    "cookieContent": document.cookie
+                }
             )
-        }
+        )
+    }
     );
     chatTextInput.addEventListener("blur", () => {
         ws.send(
@@ -1081,7 +1081,7 @@ const generateContactDiv = (username, messageContent, messageDate) => {
     const contactDiv = document.createElement('div');
     contactDiv.className = 'contact ' + username;
 
-// Create the img element
+    // Create the img element
     const profileImg = document.createElement('img');
     // img.src = './assets/hijab.jpg';
     fetch(serverURL + "/profilePicture/" + username).then(res => res.json()).then(data => {
@@ -1094,16 +1094,16 @@ const generateContactDiv = (username, messageContent, messageDate) => {
     })
     profileImg.alt = username + " profile picture";
 
-// Create the contact-box div
+    // Create the contact-box div
     const contactBox = document.createElement('div');
     contactBox.className = 'contact-box';
 
-// Create the contact-name div
+    // Create the contact-name div
     const contactName = document.createElement('div');
     contactName.className = 'contact-name';
     contactName.textContent = username;
 
-// Create the contact-last-chat div
+    // Create the contact-last-chat div
     const contactLastChat = document.createElement('div');
     contactLastChat.className = 'contact-last-chat';
     if (messageContent.length > 100) {
@@ -1111,12 +1111,12 @@ const generateContactDiv = (username, messageContent, messageDate) => {
     }
     contactLastChat.textContent = messageContent.substring(0, 103);
 
-// Create the chat-time div
+    // Create the chat-time div
     const chatTime = document.createElement('div');
     chatTime.className = 'chat-time';
     chatTime.textContent = formatDateTime(messageDate);
 
-// Append elements to their respective parents
+    // Append elements to their respective parents
     contactBox.appendChild(contactName);
     contactBox.appendChild(contactLastChat);
     contactBox.appendChild(chatTime);
@@ -1308,7 +1308,7 @@ const addSearchChatEventListener = () => {
 
 const renderUserProfilePage = (username, data) => {
     console.log(data);
-    let {bio, total_followers, total_following, total_posts, self_follows_user} = data["profileStats"];
+    let { bio, total_followers, total_following, total_posts, self_follows_user } = data["profileStats"];
     let targetUsername = data["profileStats"]["username"];
     const profileName = document.querySelector("#profile-name");
     profileName.innerHTML = targetUsername;

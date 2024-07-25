@@ -419,7 +419,7 @@ body {
 
 @keyframes gradient {
     0% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
 
     50% {
@@ -427,7 +427,7 @@ body {
     }
 
     100% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
 }
 
@@ -435,9 +435,9 @@ body {
 .main .input-area {
     /* padding: 20px;
     border-top: 1px solid #3c3c3c; */
-    -webkit-box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
-    -moz-box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
-    box-shadow: 0px -1px 5px 0px rgba(171, 171, 171, 1);
+    -webkit-box-shadow: 0 -1px 5px 0 rgba(171, 171, 171, 1);
+    -moz-box-shadow: 0 -1px 5px 0 rgba(171, 171, 171, 1);
+    box-shadow: 0 -1px 5px 0 rgba(171, 171, 171, 1);
 }
 
 .main .input-area input {
@@ -478,9 +478,9 @@ input:focus-visible {
     left: 0;
     top: auto;
     bottom: auto;
-    -webkit-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
-    -moz-box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
-    box-shadow: 1px 0px 5px 0px rgba(171, 171, 171, 1);
+    -webkit-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+    -moz-box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
+    box-shadow: 1px 0 5px 0 rgba(171, 171, 171, 1);
     display: flex;
     flex-flow: nowrap column;
 }

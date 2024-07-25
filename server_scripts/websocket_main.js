@@ -2,14 +2,14 @@ const ws = require("ws");
 const fs = require("fs");
 const cookie = require("cookie")
 
-const {authenticateUser} = require("./authenticate");
+const { authenticateUser } = require("./authenticate");
 
 let httpTextLocation;
 
 const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
     //THE CLIENT MAP IS SOLELY FOR THE PURPOSES OF SENDING BATCH STATUS REPORTS AND MESSAGES TO ONLINE USERS. IT MUST NOT BE USED AS AN AUTHENTICATION TOOL. USE authenticateUser() FOR THAT PURPOSE
     httpTextLocation = httpTextLoc;
-    const wss = new ws.Server({port: 5050});
+    const wss = new ws.Server({ port: 5050 });
     console.log("WebSocket is running on PORT 5050");
     wss.on("connection", async (ws, request) => {
         let seltzer = cookie.parse(request.headers.cookie || "")["seltzer"];
@@ -32,6 +32,14 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
             const data = JSON.parse(d);
             seltzer = cookie.parse(data["cookieContent"] || "")["seltzer"];
             username = cookie.parse(data["cookieContent"] || "")["username"];
+            // if (username === undefined || seltzer === undefined) {
+            //     ws.send(JSON.stringify(
+            //         {
+            //             messageType: "verificationStatus",
+            //             verificationStatus: false
+            //         }
+            //     ));
+            // }
             console.log("RECEIVED MESSAGE FROM SOCKET WITH USERNAME %s. WILL CHECK FOR AUTHENTICATION NOW.", username);
             const isAuthenticated = await authenticateUser(seltzer, username, connection);
             if (!isAuthenticated) {
@@ -77,13 +85,13 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                             break;
                         case "fetchFeedPosts": {
                             console.log("Time to see about those posts in the feed...");
-                            const {oldestPostID} = data;
+                            const { oldestPostID } = data;
                             sendFeedPosts(username, oldestPostID, ws, connection);
                         }
                             break;
                         case "uploadPost": {
                             console.log("%s wants to upload a post", username);
-                            let {postImage, caption} = data;
+                            let { postImage, caption } = data;
                             if (caption.trim().length === 0) {
                                 caption = "NULL";
                             }
@@ -143,7 +151,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "sendMessage": {
-                            const {receiver, messageContent} = data;
+                            const { receiver, messageContent } = data;
                             console.log("%s wants to send a message to %s", username, receiver);
                             const sendMessageStatus = await sendMessage(username, receiver, messageContent, connection);
                             //SEND TRUE IF SUCCESSFUL
@@ -178,7 +186,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "typing": {
-                            const {target} = data;
+                            const { target } = data;
                             console.log("received typing status for %s and will send this to %s", username, target);
                             if (clients.get(target)) {
                                 clients.get(target).send(
@@ -193,7 +201,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "notTyping": {
-                            const {target} = data;
+                            const { target } = data;
                             if (clients.get(target)) {
                                 clients.get(target).send(
                                     JSON.stringify(
@@ -207,7 +215,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "followUser": {
-                            const {target, menuRequest} = data;
+                            const { target, menuRequest } = data;
                             const followUserQuery = `INSERT INTO follows (follower, followee) VALUE ((SELECT id FROM users WHERE username="${username}"), (SELECT id FROM users WHERE username="${target}"));`;
                             //SEND TRUE IF SUCCESSFUL
                             connection.query(followUserQuery, (error, result) => {
@@ -228,7 +236,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "unFollowUser": {
-                            const {target, menuRequest} = data;
+                            const { target, menuRequest } = data;
                             console.log("request to unfollow user");
                             const unfollowUserQuery = `DELETE FROM follows WHERE (followee=(SELECT id FROM users WHERE username="${target}") AND follower=(SELECT id FROM users WHERE username="${username}"));`
                             console.log(unfollowUserQuery);
@@ -251,7 +259,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "likePost": {
-                            const {postID} = data;
+                            const { postID } = data;
                             const likePostQuery = `INSERT INTO likes (liker, post_id) VALUE ((SELECT id FROM users WHERE username="${username}"), ${postID});`;
                             connection.query(likePostQuery, (error, result) => {
                                 if (error) {
@@ -270,7 +278,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "unLikePost": {
-                            const {postID} = data;
+                            const { postID } = data;
                             const unLikePostQuery = `DELETE FROM likes WHERE post_id=${postID} AND liker=(SELECT id FROM users WHERE username="${username}");`
                             connection.query(unLikePostQuery, (error) => {
                                 if (error) {
@@ -289,7 +297,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                         }
                             break;
                         case "oneUserAllPosts": {
-                            const {target} = data;
+                            const { target } = data;
                             console.log("Will fetch all posts for %s", target);
                             const allPostsFetchQuery = `SELECT post_id FROM posts WHERE post_user=(SELECT id FROM users WHERE username="${target}") ORDER BY post_date DESC;`
                             connection.query(allPostsFetchQuery, (error, result) => {
@@ -309,7 +317,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                             })
                         } break;
                         case "fetchImage": {
-                            const {imageID} = data;
+                            const { imageID } = data;
                             const fetchImageQuery = `SELECT post_image FROM posts WHERE post_id=${imageID};`;
                             connection.query(fetchImageQuery, (error, result) => {
                                 if (error) {
@@ -329,7 +337,7 @@ const handleWebSocketConnections = (clients, connection, httpTextLoc) => {
                             break;
                         case "fetchChat": {
                             console.log("Fetch chat request has been made by %s", username);
-                            const {target, oldestMessageID} = data;
+                            const { target, oldestMessageID } = data;
                             const fetchedChat = await fetchChat(username, target, oldestMessageID, connection);
                             ws.send(JSON.stringify(
                                 {
@@ -524,5 +532,5 @@ const getCurrentDateTimeString = () => {
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
 }
-module.exports = {handleWebSocketConnections, sendOnlineStatus, signOutUser}
+module.exports = { handleWebSocketConnections, sendOnlineStatus, signOutUser }
 

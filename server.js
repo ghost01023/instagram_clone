@@ -13,10 +13,10 @@ let connection;
 /////////////////////////////////
 //////IMPORTED CUSTOM MODULES////
 /////////////////////////////////
-const {handleWebSocketConnections, signOutUser, sendOnlineStatus} = require("./server_scripts/websocket_main");
-const {loginUser} = require("./server_scripts/user_login");
-const {registerUser} = require("./server_scripts/user_signup");
-const {authenticateUser} = require("./server_scripts/authenticate");
+const { handleWebSocketConnections, signOutUser, sendOnlineStatus } = require("./server_scripts/websocket_main");
+const { loginUser } = require("./server_scripts/user_login");
+const { registerUser } = require("./server_scripts/user_signup");
+const { authenticateUser } = require("./server_scripts/authenticate");
 // const { MySQLConnectionManager } = require("./server_scripts/try_conn");
 /////////////////////////////////
 /////////////////////////////////
@@ -68,9 +68,9 @@ app.listen(5000, () => {
 
 // GET ROUTE FOR MESSAGES/CHATS HTML
 app.get("/messagesInnerHTML", (_req, res) => {
-        // console.log("XMLHttp request made for chat.html");
-        sendInnerHTML("chat.html", res);
-    }
+    // console.log("XMLHttp request made for chat.html");
+    sendInnerHTML("chat.html", res);
+}
 )
 
 //GET ROUTE FOR MAIN PAGE INNER HTML
@@ -184,9 +184,9 @@ app.get("/profilePicture/:username", (req, res) => {
             const imagePresent = results[0]["profile_picture"];
             if (imagePresent !== null) {
                 const base64ProfilePicture = results[0]["profile_picture"].toString("utf8");
-                res.json({"imagePresent": true, "base64ProfilePicture": base64ProfilePicture});
+                res.json({ "imagePresent": true, "base64ProfilePicture": base64ProfilePicture });
             } else {
-                res.json({"imagePresent": false});
+                res.json({ "imagePresent": false });
             }
         }
     })
